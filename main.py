@@ -1,5 +1,8 @@
 from fastapi import FastAPI
-import pydantic
+from pydantic import BaseModel
+
+class URL(BaseModel):
+    url: str
 
 app = FastAPI()
 
@@ -9,15 +12,15 @@ url_list = []
 def home():
     return {"message": "URL Shortener is running!"}
 
-@app.get("/list")
-def list():
+@app.get("/urls")
+def get_urls():
     return url_list
 
-@app.get("/url/{id}")
+@app.get("/urls/{id}")
 def get_url(id: str):
     return {"message": f"URL for ID {id}!"}
 
-@app.post("/url")
-def create_url(url: str):
-    url_list.append(url)
-    return {"message": f"URL {url} added!"}
+@app.post("/urls")
+def create_url(url: URL):
+    url_list.append(url.url)
+    return {"message": f"URL {url.url} added!"}
