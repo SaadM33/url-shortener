@@ -1,18 +1,24 @@
 
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
+from pydantic import BaseModel
+
+class URL(BaseModel):
+    url: str
 
 app = FastAPI()
+
+url_list = []
 
 @app.get("/")
 def home():
     return {"message": "URL Shortener: Welcome to root!"}
 
-@app.get("/about")
-def about():
-    return {"message": "About: This is a simple URL shortener service built with FastAPI."}
+@app.get("/urls")
+def get_urls():
+    return url_list
 
-@app.get("/url/{id}")
+@app.get("/urls/{id}")
 def get_url(id: str):
     return RedirectResponse(url="https://www.youtube.com/watch?v=jx96LweuWWI&list=RDjx96LweuWWI&start_radio=1")
     
@@ -46,3 +52,7 @@ def get_url(id: str):
 
 # import requests
 # r = requests.post("http://localhost:8000/url/123", params={"url": "https://www.youtube.com/watch?v=jx96LweuWWI&list=RDjx96LweuWWI&start_radio=1"})
+@app.post("/urls")
+def create_url(url: URL):
+    url_list.append(url.url)
+    return {"message": f"URL {url.url} added!"}
