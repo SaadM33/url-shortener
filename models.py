@@ -1,0 +1,19 @@
+from sqlalchemy import Column, Integer, String, DateTime
+from datetime import datetime, timezone
+from database import Base
+
+class URL(Base):
+
+    __tablename__ = "urls"
+
+    id = Column(Integer, primary_key=True)
+    
+    long_url = Column(String(2048))
+
+    short_code = Column(String(100))
+
+    visits = Column(Integer, default=0)
+
+    created_at = Column(DateTime, default=datetime.now())
+
+
