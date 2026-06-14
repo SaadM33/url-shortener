@@ -1,8 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, AnyHttpUrl
 from datetime import datetime
 
 class URLInput(BaseModel):
-    url: str
+    url: AnyHttpUrl
 
 class URLResponse(BaseModel):
     id: int
