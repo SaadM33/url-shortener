@@ -14,6 +14,6 @@ class URL(Base):
 
     visits = Column(Integer, default=0)
 
-    created_at = Column(DateTime, default=datetime.now())
+    created_at = Column(DateTime, default=datetime.utcnow())
 
 

@@ -14,7 +14,7 @@ Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 def home():
-    return "Hello, World!"
+    return "URL shorener is running 👍"
 
 
 @app.get("/urls", response_model=list[URLResponse]) 
@@ -42,8 +42,6 @@ def create_url(data: URLInput):
 
 @app.get("/{code}")
 def get_url(code: str):
-    if (code == "test"):
-        return RedirectResponse(url="urls")
     db = session_local()
     res = db.query(URL).filter(URL.short_code == code).first()
     if res is not None:
