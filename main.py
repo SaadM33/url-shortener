@@ -40,11 +40,40 @@ def create_url(data: URLInput):
     return new_url
 
 
+@app.put("/urls/{code}", response_model=URLResponse)
+def update_url(code: str, data: URLInput):
+    db = session_local()
+    url = db.query(URL).filter(URL.short_code == code).first()
+    if url:
+        url.long_url = data.url
+        db.commit()
+        db.refresh(url)
+        db.close()
+        return url
+    else:
+        db.close()
+        raise HTTPException(status_code=404, detail="short code not found")
+
+
+@app.delete("/urls/{code}")
+def del_url(code: str):
+    db = session_local()
+    res = db.query(URL).filter(URL.short_code == code).first()
+    if res:
+        db.delete(res)
+        db.commit()
+        db.close()
+        return {"detail": "URL deleted successfully"}
+    else:
+        db.close()
+        raise HTTPException(status_code=404, detail="short code not found")
+
+
 @app.get("/{code}")
 def get_url(code: str):
     db = session_local()
     res = db.query(URL).filter(URL.short_code == code).first()
-    if res is not None:
+    if res:
         res.visits += 1
         db.commit()
         long_url = res.long_url
