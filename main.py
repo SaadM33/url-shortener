@@ -1,5 +1,7 @@
-from fastapi import FastAPI, HTTPException 
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
+
 from schemas import URLInput, URLResponse
 from database import Base, engine, session_local
 from models import URL
@@ -9,6 +11,15 @@ import secrets
 
 
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 Base.metadata.create_all(bind=engine)
 
@@ -32,7 +43,14 @@ def generate_short_code(length=6):
 @app.post("/urls", response_model=URLResponse)
 def create_url(data: URLInput):
     db = session_local()
-    new_url = URL(long_url=data.url, short_code=generate_short_code())
+    
+    while True:
+        code = generate_short_code()
+        exists = db.query(URL).filter(URL.short_code == code).first()
+        if not exists:
+            break
+            
+    new_url = URL(long_url=str(data.url), short_code=code)
     db.add(new_url)
     db.commit()
     db.refresh(new_url)
@@ -45,7 +63,7 @@ def update_url(code: str, data: URLInput):
     db = session_local()
     url = db.query(URL).filter(URL.short_code == code).first()
     if url:
-        url.long_url = data.url
+        url.long_url = str(data.url)
         db.commit()
         db.refresh(url)
         db.close()

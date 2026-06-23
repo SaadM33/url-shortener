@@ -4,3 +4,5 @@ __pycache__/
 *.py[cod]
 /
 .vscode/settings.json
+SQLALCHEMY_MYSQL_GUIDE.md
+.env

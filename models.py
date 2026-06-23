@@ -10,10 +10,10 @@ class URL(Base):
     
     long_url = Column(String(2048))
 
-    short_code = Column(String(100))
+    short_code = Column(String(100), unique=True, index=True)
 
     visits = Column(Integer, default=0)
 
-    created_at = Column(DateTime, default=datetime.utcnow())
+    created_at = Column(DateTime, default=datetime.now)
 
 
