@@ -12,7 +12,7 @@ import secrets
 
 app = FastAPI()
 
-# Add CORS middleware
+# CORS middleware   
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
