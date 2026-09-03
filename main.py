@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from schemas import URLInput, URLResponse
-from database import Base, engine, get_db
+from database import get_db
 from models import URL
 
 import string
