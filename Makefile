@@ -13,7 +13,7 @@ help:
 	@echo "  make revision     Create a new Alembic revision with autogenerate"
 
 install:
-	$(PYTHON) -m pip install fastapi uvicorn sqlalchemy alembic psycopg2-binary python-dotenv
+	$(PYTHON) -m pip install fastapi uvicorn sqlalchemy alembic pymysql pydantic-settings
 
 dev: mysql-dev
 	@if [ -d alembic/versions ] && [ "$$(find alembic/versions -maxdepth 1 -type f | wc -l)" -gt 0 ]; then \
@@ -24,7 +24,8 @@ dev: mysql-dev
 	@$(MAKE) run
 
 run:
-	uvicorn main:app --reload
+	@export PYTHONDONTWRITEBYTECODE=1; \
+	uvicorn app.main:app --reload
 
 mysql-dev:
 	@docker ps -a --format '{{.Names}}' | grep -qx 'mysql-dev' || docker run --name mysql-dev \
