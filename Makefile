@@ -34,6 +34,14 @@ mysql-dev:
 		-p 3306:3306 \
 		-d mysql:debian
 	@docker start mysql-dev >/dev/null 2>&1 || true
+	@echo "Waiting for mysql-dev to accept connections..."; \
+	for i in $$(seq 1 30); do \
+		if docker exec mysql-dev mysqladmin ping -h127.0.0.1 -proot --silent >/dev/null 2>&1; then \
+			echo "mysql-dev is ready"; \
+			break; \
+		fi; \
+		sleep 1; \
+		done
 
 upgrade:
 	alembic upgrade head
