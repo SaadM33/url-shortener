@@ -1,13 +1,19 @@
-
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 
-from app.schemas.user import UserCreate, UserResponse
-from app.models.user import User
 from app.db.session import get_db
-from app.core.security import hash_password
+from app.api.deps import get_current_user
+from app.models.user import User
+from app.core.security import hash_password, verify_password, create_access_token
+from app.core.config import settings
+from app.schemas.user import UserCreate, UserResponse, UserLogin
+
 
 router = APIRouter()
+
+@router.get("/auth/me", response_model=UserResponse)
+def read_current_user(current_user: User = Depends(get_current_user)):
+    return current_user
 
 #get list of users, this is just for testing purposes, in production you would not want to expose this endpoint
 @router.get("/auth/users", response_model=list[UserResponse])
@@ -25,3 +31,25 @@ def register(data: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
     return new_user
+
+
+@router.post("/auth/login")
+def login(data: UserLogin, response: Response, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == data.email).first()
+    if not user or not verify_password(data.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="invalid credentials")
+
+    token = create_access_token(
+        data={"user_id": str(user.id)},
+        expires_minutes=settings.TOKEN_EXPIRE_MINUTES,
+    )
+
+    response.set_cookie(
+        key="jwt_token",
+        value=token,
+        httponly=True,
+        samesite="lax",
+        secure=False,
+        max_age=settings.TOKEN_EXPIRE_MINUTES * 60
+    )
+    return {"detail": "logged in"}

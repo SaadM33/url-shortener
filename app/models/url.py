@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 
 from app.db.base import Base
 
@@ -13,6 +13,8 @@ class URL(Base):
     long_url = Column(String(2048))
 
     short_code = Column(String(100), unique=True, index=True)
+
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=True)    
 
     visits = Column(Integer, default=0)
 

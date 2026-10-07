@@ -31,7 +31,7 @@ mysql-dev:
 	@docker ps -a --format '{{.Names}}' | grep -qx 'mysql-dev' || docker run --name mysql-dev \
 		-e MYSQL_ROOT_PASSWORD=root \
 		-e MYSQL_DATABASE=url_shortener \
-		-p 3306:3306 \
+		-p 3307:3306 \
 		-d mysql:debian
 	@docker start mysql-dev >/dev/null 2>&1 || true
 	@echo "Waiting for mysql-dev to accept connections..."; \

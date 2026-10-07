@@ -27,7 +27,7 @@ python3 -m pip install fastapi uvicorn sqlalchemy alembic psycopg2-binary python
 Create a `.env` file in the project root with a `DATABASE_URL` variable. Example:
 
 ```env
-DATABASE_URL=mysql+pymysql://root:root@localhost:3306/url_shortener
+DATABASE_URL=mysql+pymysql://root:root@localhost:3307/url_shortener
 ```
 
 If you are using the provided Docker setup, the container is created with:
@@ -52,7 +52,7 @@ type make install
 make mysql-dev
 ```
 
-This starts a local MySQL container named `mysql-dev` on port `3306`.
+This starts a local MySQL container named `mysql-dev` on port `3307`.
 
 ### 3) Start the project
 

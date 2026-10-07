@@ -5,4 +5,3 @@ __pycache__/
 /
 .vscode/settings.json
 SQLALCHEMY_MYSQL_GUIDE.md
-.env
