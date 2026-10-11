@@ -19,7 +19,7 @@ A small FastAPI URL shortener with SQLAlchemy models and Alembic migrations.
 Install the Python dependencies:
 
 ```bash
-python3 -m pip install fastapi uvicorn sqlalchemy alembic psycopg2-binary python-dotenv
+python3 -m pip install fastapi uvicorn sqlalchemy alembic pymysql pydantic-settings passlib bcrypt 'python-jose[cryptography]'
 ```
 
 ## Environment setup
