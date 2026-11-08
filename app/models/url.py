@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, true
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, false, true
 
 from app.db.base import Base
 
@@ -27,3 +27,6 @@ class URL(Base):
 
     # NULL means unlimited visits
     max_visits = Column(Integer, nullable=True)
+
+    # set when an admin disables the link; the owner cannot turn it back on
+    admin_disabled = Column(Boolean, nullable=False, default=False, server_default=false())

@@ -21,11 +21,11 @@ Tests: keep minimal, a few smoke tests only.
 - [x] Roles: user/admin + CLI to create first admin (19)
 
 ## Phase 4: Dashboard + Admin
-- [ ] My links: pagination, search, filter, sort (15)
-- [ ] Per-link analytics (16)
-- [ ] User management (20)
-- [ ] Link moderation (21)
-- [ ] Site-wide stats (22)
+- [x] My links: pagination, search, filter, sort (15)
+- [x] Per-link analytics (16)
+- [x] User management (20)
+- [x] Link moderation (21)
+- [x] Site-wide stats (22)
 
 ## Phase 5: Platform
 - [ ] Docker-compose for app + MySQL (28)

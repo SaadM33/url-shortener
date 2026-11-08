@@ -50,8 +50,37 @@ class URLResponse(BaseModel):
     visits: int
     created_at: datetime
     is_active: bool
+    admin_disabled: bool
     expires_at: datetime | None
     max_visits: int | None
+    owner_id: int | None
 
     class Config:
         from_attributes = True
+
+
+class URLPage(BaseModel):
+    items: list[URLResponse]
+    total: int
+    limit: int
+    offset: int
+
+
+class CountItem(BaseModel):
+    name: str
+    count: int
+
+
+class DayCount(BaseModel):
+    date: str
+    count: int
+
+
+class URLStats(BaseModel):
+    days: int
+    total_clicks: int
+    unique_visitors: int
+    clicks_by_day: list[DayCount]
+    top_referrers: list[CountItem]
+    devices: list[CountItem]
+    browsers: list[CountItem]

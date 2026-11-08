@@ -80,6 +80,9 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         db, info["sub"], info["email"], bool(info.get("email_verified"))
     )
 
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="account disabled")
+
     response = RedirectResponse(url=settings.FRONTEND_URL, status_code=302)
     set_auth_cookie(response, user.id)
     return response

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, true
 
 from app.db.base import Base
 
@@ -19,5 +19,8 @@ class User(Base):
 	google_sub = Column(String(64), unique=True, nullable=True)
 
 	role = Column(String(20), nullable=False, default="user", server_default="user")
+
+	# False = banned
+	is_active = Column(Boolean, nullable=False, default=True, server_default=true())
 
 	created_at = Column(DateTime, default=datetime.now)

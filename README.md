@@ -97,6 +97,17 @@ Promote a registered user:
 make create-admin EMAIL=you@example.com
 ```
 
+## API overview
+
+Interactive docs at `http://localhost:8000/docs`.
+
+- `GET /urls?q=&status=&sort=&order=&limit=&offset=` — your links (paginated)
+- `GET /urls/{code}/stats?days=30` — clicks per day, unique visitors, referrers, devices, browsers
+- `/admin/users`, `/admin/urls`, `/admin/stats` — admin only (user management, link moderation, site stats)
+
+Clicks store the referrer hostname, device/browser and a salted hash of IP + user agent
+(used only to count unique visitors). Raw IPs are not stored.
+
 ## Alembic commands
 
 Create a new migration:

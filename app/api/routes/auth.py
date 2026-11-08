@@ -49,6 +49,8 @@ def login(data: UserLogin, response: Response, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
     if not user or not verify_password(data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="invalid credentials")
+    if not user.is_active:
+        raise HTTPException(status_code=403, detail="account disabled")
 
     set_auth_cookie(response, user.id)
     return {"detail": "logged in"}

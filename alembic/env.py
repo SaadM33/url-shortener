@@ -8,6 +8,7 @@ from app.core.config import settings
 from app.db.base import Base
 from app.models.user import User
 from app.models.url import URL
+from app.models.click import Click
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
