@@ -13,6 +13,11 @@ class User(Base):
 
 	email = Column(String(100), unique=True, index=True, nullable=False)
 
-	password_hash = Column(String(128), nullable=False)
+	# NULL for accounts that only sign in with Google
+	password_hash = Column(String(128), nullable=True)
+
+	google_sub = Column(String(64), unique=True, nullable=True)
+
+	role = Column(String(20), nullable=False, default="user", server_default="user")
 
 	created_at = Column(DateTime, default=datetime.now)

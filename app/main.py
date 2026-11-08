@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 
-from app.api.routes import urls, auth
+from app.api.routes import urls, auth, google
+from app.core.config import settings
 
 
 app = FastAPI(title="URL Shortener")
@@ -15,8 +17,18 @@ app.add_middleware(
 )
 
 
-app.include_router(urls.router)
+# short-lived session cookie used only to hold OAuth state during the Google redirect
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.JWT_KEY,
+    max_age=600,
+    same_site="lax",
+    https_only=settings.COOKIE_SECURE,
+)
+
 app.include_router(auth.router)
+app.include_router(google.router)
+app.include_router(urls.router)
 
 
 @app.get("/")

@@ -76,6 +76,27 @@ Or if you only want the app itself:
 make run
 ```
 
+## Google sign-in (optional)
+
+Create an OAuth client in Google Cloud Console (type: Web application) with the redirect URI
+`http://localhost:8000/auth/google/callback`, then add to `.env`:
+
+```env
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+```
+
+Visit `/auth/google/login` to start. Until these are set the endpoints return 503.
+An existing account with the same (Google-verified) email is linked automatically.
+
+## Admins
+
+Promote a registered user:
+
+```bash
+make create-admin EMAIL=you@example.com
+```
+
 ## Alembic commands
 
 Create a new migration:

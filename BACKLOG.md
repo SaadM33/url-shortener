@@ -12,13 +12,13 @@ Tests: keep minimal, a few smoke tests only.
 - [x] Cookie settings moved to config
 
 ## Phase 2: Core links
-- [ ] Custom aliases with reserved words (1)
-- [ ] Link expiry by date or click count (2)
-- [ ] Enable/disable a link (3)
+- [x] Custom aliases with reserved words (1)
+- [x] Link expiry by date or click count (2)
+- [x] Enable/disable a link (3)
 
 ## Phase 3: Auth
-- [ ] Google OAuth, linked by email (11)
-- [ ] Roles: user/admin + CLI to create first admin (19)
+- [x] Google OAuth, linked by email (11)
+- [x] Roles: user/admin + CLI to create first admin (19)
 
 ## Phase 4: Dashboard + Admin
 - [ ] My links: pagination, search, filter, sort (15)

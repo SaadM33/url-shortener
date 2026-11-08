@@ -1,9 +1,10 @@
-.PHONY: install dev run mysql-dev upgrade downgrade revision help
+.PHONY: create-admin install dev run mysql-dev upgrade downgrade revision help
 
 PYTHON ?= python3
 
 help:
 	@echo "Available commands:"
+	@echo "  make create-admin EMAIL=you@example.com  Promote a registered user to admin"
 	@echo "  make install      Install project dependencies"
 	@echo "  make dev          Start MySQL if needed, upgrade if migration files exist, then run the app"
 	@echo "  make run          Run the FastAPI app with uvicorn"
@@ -11,6 +12,10 @@ help:
 	@echo "  make upgrade      Apply pending Alembic migrations"
 	@echo "  make downgrade    Roll back the latest migration"
 	@echo "  make revision     Create a new Alembic revision with autogenerate"
+
+create-admin:
+	@test -n "$(EMAIL)" || (echo "usage: make create-admin EMAIL=you@example.com"; exit 1)
+	$(PYTHON) -m app.cli create-admin $(EMAIL)
 
 install:
 	$(PYTHON) -m pip install -r requirements.txt
