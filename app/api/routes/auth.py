@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, limit_login, limit_register
 from app.models.user import User
 from app.core.security import hash_password, verify_password, create_access_token
 from app.core.config import settings
@@ -31,7 +31,7 @@ def set_auth_cookie(response: Response, user_id: int) -> None:
 def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user
 
-@router.post("/auth/register", response_model=UserResponse)
+@router.post("/auth/register", response_model=UserResponse, dependencies=[Depends(limit_register)])
 def register(data: UserCreate, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == data.email).first()
     if existing:
@@ -44,7 +44,7 @@ def register(data: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-@router.post("/auth/login")
+@router.post("/auth/login", dependencies=[Depends(limit_login)])
 def login(data: UserLogin, response: Response, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
     if not user or not verify_password(data.password, user.password_hash):

@@ -10,7 +10,7 @@ from sqlalchemy import and_, func, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_user, limit_create_url
 from app.db.session import get_db
 from app.models.click import Click
 from app.models.url import URL
@@ -93,7 +93,7 @@ def get_owned_url(code: str, db: Session, user: User) -> URL:
     return url
 
 
-@router.post("/urls", response_model=URLResponse)
+@router.post("/urls", response_model=URLResponse, dependencies=[Depends(limit_create_url)])
 def create_url(
     data: URLInput,
     db: Session = Depends(get_db),

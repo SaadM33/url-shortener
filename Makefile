@@ -1,9 +1,12 @@
-.PHONY: create-admin install dev run mysql-dev upgrade downgrade revision help
+.PHONY: docker-up docker-down test create-admin install dev run mysql-dev upgrade downgrade revision help
 
 PYTHON ?= python3
 
 help:
 	@echo "Available commands:"
+	@echo "  make docker-up    Build and run app + MySQL in Docker (APP_PORT=8000 by default)"
+	@echo "  make docker-down  Stop the Docker stack"
+	@echo "  make test         Run the smoke tests (in-memory SQLite, no MySQL needed)"
 	@echo "  make create-admin EMAIL=you@example.com  Promote a registered user to admin"
 	@echo "  make install      Install project dependencies"
 	@echo "  make dev          Start MySQL if needed, upgrade if migration files exist, then run the app"
@@ -12,6 +15,15 @@ help:
 	@echo "  make upgrade      Apply pending Alembic migrations"
 	@echo "  make downgrade    Roll back the latest migration"
 	@echo "  make revision     Create a new Alembic revision with autogenerate"
+
+docker-up:
+	docker compose up --build
+
+docker-down:
+	docker compose down
+
+test:
+	$(PYTHON) -m pytest -q
 
 create-admin:
 	@test -n "$(EMAIL)" || (echo "usage: make create-admin EMAIL=you@example.com"; exit 1)

@@ -28,9 +28,9 @@ Tests: keep minimal, a few smoke tests only.
 - [x] Site-wide stats (22)
 
 ## Phase 5: Platform
-- [ ] Docker-compose for app + MySQL (28)
-- [ ] Minimal smoke tests + CI (27)
-- [ ] In-memory rate limiting on login and link creation (24)
+- [x] Docker-compose for app + MySQL (28)
+- [x] Minimal smoke tests + CI (27)
+- [x] In-memory rate limiting on login and link creation (24)
 
 ## Phase 6: Next tier
 - [ ] QR codes (7)

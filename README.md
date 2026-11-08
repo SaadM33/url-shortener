@@ -76,6 +76,30 @@ Or if you only want the app itself:
 make run
 ```
 
+## Docker
+
+Runs the app and MySQL together (migrations are applied on start):
+
+```bash
+make docker-up
+```
+
+The app is on `http://localhost:8000` (change with `APP_PORT=8010 make docker-up`), MySQL on host port 3308.
+Secrets still come from `.env`; `DATABASE_URL` is overridden to point at the container.
+
+## Tests and rate limits
+
+```bash
+pip install -r requirements-dev.txt
+make test
+```
+
+A few smoke tests run against in-memory SQLite and never touch your dev database. CI runs them on every push.
+
+Rate limits are in-memory (per worker process, reset on restart): login 10/min and register 5/min per IP,
+link creation 30/min per user. Tune with `RATE_LOGIN_PER_MIN`, `RATE_REGISTER_PER_MIN`,
+`RATE_CREATE_URL_PER_MIN`, or turn off with `RATE_LIMIT_ENABLED=false`.
+
 ## Google sign-in (optional)
 
 Create an OAuth client in Google Cloud Console (type: Web application) with the redirect URI

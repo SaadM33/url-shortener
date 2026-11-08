@@ -1,0 +1,9 @@
+.git
+.github
+.vscode
+.env
+__pycache__
+*.pyc
+tests
+Dockerfile
+docker-compose.yml
