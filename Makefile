@@ -13,7 +13,7 @@ help:
 	@echo "  make revision     Create a new Alembic revision with autogenerate"
 
 install:
-	$(PYTHON) -m pip install fastapi uvicorn sqlalchemy alembic pymysql pydantic-settings passlib bcrypt
+	$(PYTHON) -m pip install -r requirements.txt
 
 dev: mysql-dev
 	@if [ -d alembic/versions ] && [ "$$(find alembic/versions -maxdepth 1 -type f | wc -l)" -gt 0 ]; then \

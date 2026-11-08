@@ -4,10 +4,11 @@ from jose import JWTError
 
 from app.db.session import get_db
 from app.models.user import User
+from app.core.config import settings
 from app.core.security import decode_access_token
 
 def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
-    token = request.cookies.get("jwt_token")
+    token = request.cookies.get(settings.COOKIE_NAME)
     if not token:
         raise HTTPException(status_code=401, detail="not authenticated")
 

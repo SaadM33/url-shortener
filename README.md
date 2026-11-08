@@ -4,22 +4,24 @@ A small FastAPI URL shortener with SQLAlchemy models and Alembic migrations.
 
 ## What this project does
 
-- Exposes a FastAPI app in `main.py`
-- Stores shortened URLs using SQLAlchemy models in `models.py`
-- Uses a shared SQLAlchemy base in `database.py`
-- Validates request/response payloads with Pydantic in `schemas.py`
+- Exposes a FastAPI app in `app/main.py`
+- Cookie-based JWT auth (register, login, logout, refresh)
+- Per-user short links; only the owner can list, edit or delete them
+- Stores data with SQLAlchemy models in `app/models/`
+- Validates payloads with Pydantic in `app/schemas/`
 - Tracks schema changes through Alembic in `alembic/`
 
 ## Requirements
 
 - Python 3.10+
+- `.env` needs `DATABASE_URL`, `JWT_KEY`; optional `TOKEN_EXPIRE_MINUTES`, `COOKIE_SECURE`, `COOKIE_SAMESITE`, `COOKIE_NAME`
 - Docker (for the local MySQL dev container)
 - MySQL or another supported SQLAlchemy database
 
 Install the Python dependencies:
 
 ```bash
-python3 -m pip install fastapi uvicorn sqlalchemy alembic psycopg2-binary python-dotenv
+python3 -m pip install -r requirements.txt
 ```
 
 ## Environment setup
@@ -42,7 +44,7 @@ MYSQL_DATABASE=url_shortener
 ### 1) Install dependencies
 
 ```bash
-type make install
+make install
 # or run the pip command directly
 ```
 
@@ -90,7 +92,7 @@ make upgrade
 Rollback to a previous revision:
 
 ```bash
-type make downgrade
+make downgrade
 ```
 
 This will prompt for the target revision.
@@ -119,10 +121,12 @@ make revision
 
 ## Project files
 
-- `main.py` — FastAPI routes and app setup
-- `database.py` — SQLAlchemy engine, session, and Base
-- `models.py` — ORM models
-- `schemas.py` — request/response validation
+- `app/main.py` — FastAPI app setup
+- `app/api/` — routes and dependencies
+- `app/core/` — config and security helpers
+- `app/db/` — engine, session, Base
+- `app/models/` — ORM models
+- `app/schemas/` — request/response validation
 - `alembic/` — migration scripts
 - `Makefile` — local developer shortcuts
 

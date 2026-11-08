@@ -11,14 +11,25 @@ from app.schemas.user import UserCreate, UserResponse, UserLogin
 
 router = APIRouter()
 
+
+def set_auth_cookie(response: Response, user_id: int) -> None:
+    token = create_access_token(
+        data={"user_id": str(user_id)},
+        expires_minutes=settings.TOKEN_EXPIRE_MINUTES,
+    )
+    response.set_cookie(
+        key=settings.COOKIE_NAME,
+        value=token,
+        httponly=True,
+        samesite=settings.COOKIE_SAMESITE,
+        secure=settings.COOKIE_SECURE,
+        max_age=settings.TOKEN_EXPIRE_MINUTES * 60,
+    )
+
+
 @router.get("/auth/me", response_model=UserResponse)
 def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user
-
-#get list of users, this is just for testing purposes, in production you would not want to expose this endpoint
-@router.get("/auth/users", response_model=list[UserResponse])
-def get_users(db: Session = Depends(get_db)):
-    return db.query(User).all()
 
 @router.post("/auth/register", response_model=UserResponse)
 def register(data: UserCreate, db: Session = Depends(get_db)):
@@ -39,17 +50,23 @@ def login(data: UserLogin, response: Response, db: Session = Depends(get_db)):
     if not user or not verify_password(data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="invalid credentials")
 
-    token = create_access_token(
-        data={"user_id": str(user.id)},
-        expires_minutes=settings.TOKEN_EXPIRE_MINUTES,
-    )
-
-    response.set_cookie(
-        key="jwt_token",
-        value=token,
-        httponly=True,
-        samesite="lax",
-        secure=False,
-        max_age=settings.TOKEN_EXPIRE_MINUTES * 60
-    )
+    set_auth_cookie(response, user.id)
     return {"detail": "logged in"}
+
+
+@router.post("/auth/refresh")
+def refresh(response: Response, current_user: User = Depends(get_current_user)):
+    """Issue a fresh token for a still-valid session (sliding expiry)."""
+    set_auth_cookie(response, current_user.id)
+    return {"detail": "token refreshed"}
+
+
+@router.post("/auth/logout")
+def logout(response: Response):
+    response.delete_cookie(
+        key=settings.COOKIE_NAME,
+        httponly=True,
+        samesite=settings.COOKIE_SAMESITE,
+        secure=settings.COOKIE_SECURE,
+    )
+    return {"detail": "logged out"}
