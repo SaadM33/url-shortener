@@ -15,6 +15,12 @@ class Settings(BaseSettings):
     COOKIE_SECURE: bool = False
     COOKIE_SAMESITE: str = "lax"
 
+    # Background job that deletes links whose expires_at passed long ago.
+    # Links that only hit their click limit are kept (they have no expiry time).
+    CLEANUP_ENABLED: bool = True
+    CLEANUP_INTERVAL_MINUTES: int = 60
+    EXPIRED_LINK_RETENTION_DAYS: int = 30
+
     # in-memory rate limits (requests per minute); see app/core/ratelimit.py
     RATE_LIMIT_ENABLED: bool = True
     RATE_LOGIN_PER_MIN: int = 10  # per client IP

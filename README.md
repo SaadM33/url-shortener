@@ -109,6 +109,13 @@ Without `SMTP_HOST` in `.env`, emails are printed in the server log instead of s
 run [Mailpit](https://mailpit.axllent.org) and set `SMTP_HOST=localhost`, `SMTP_PORT=1025`, `SMTP_STARTTLS=false`.
 Other settings: `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `RESET_TOKEN_EXPIRE_MINUTES`.
 
+## Background cleanup
+
+While the app runs, it deletes links whose `expires_at` passed more than 30 days ago (with their click history),
+once at startup and then hourly. Links that only hit their click limit are kept. Tune with
+`EXPIRED_LINK_RETENTION_DAYS`, `CLEANUP_INTERVAL_MINUTES`, or turn off with `CLEANUP_ENABLED=false`.
+Run it by hand with `python -m app.cli purge-expired`. With several workers each one runs the job; that is harmless.
+
 ## Google sign-in (optional)
 
 Create an OAuth client in Google Cloud Console (type: Web application) with the redirect URI

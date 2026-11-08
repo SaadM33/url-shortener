@@ -117,3 +117,26 @@ def test_profile_overview_and_account_deletion(make_client):
     assert alice.request("DELETE", "/auth/me", json={"password": "a-new-password"}).status_code == 200
     assert visitor.get("/one", follow_redirects=False).status_code == 404
     assert bob.get("/auth/me").status_code == 200
+
+
+def test_cleanup_deletes_only_long_expired_links(make_client, session_factory):
+    from datetime import datetime, timedelta
+
+    from app.models.click import Click
+    from app.models.url import URL as Link
+    from app.services.cleanup import purge_expired_links
+
+    alice, visitor = make_client("alice"), make_client()
+    for alias in ("old", "recent", "forever"):
+        alice.post("/urls", json={"url": URL, "alias": alias})
+    visitor.get("/old", follow_redirects=False)
+
+    now = datetime.utcnow()
+    with session_factory() as db:
+        for alias, delta in (("old", 40), ("recent", 5)):
+            db.query(Link).filter(Link.short_code == alias).update({Link.expires_at: now - timedelta(days=delta)})
+        db.commit()
+
+        assert purge_expired_links(db, retention_days=30) == 1
+        assert [u.short_code for u in db.query(Link).order_by(Link.short_code)] == ["forever", "recent"]
+        assert db.query(Click).count() == 0  # the old link's click history went with it

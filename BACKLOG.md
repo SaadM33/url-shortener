@@ -39,7 +39,8 @@ Tests: keep minimal, a few smoke tests only.
 - [x] Profile management (13)
 - [ ] API keys (14)
 - [x] Account overview (17)
-- [ ] Background cleanup of expired links, async click recording (26)
+- [x] Background cleanup of expired links (26)
+- [ ] Async click recording (26)
 - [ ] API docs polish, consistent errors (29)
 - [ ] Logging + health check (30)
 

@@ -1,12 +1,26 @@
+import asyncio
+from contextlib import asynccontextmanager, suppress
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.api.routes import admin, urls, auth, google, password, profile
 from app.core.config import settings
+from app.services.cleanup import cleanup_loop
 
 
-app = FastAPI(title="URL Shortener")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    task = asyncio.create_task(cleanup_loop()) if settings.CLEANUP_ENABLED else None
+    yield
+    if task:
+        task.cancel()
+        with suppress(asyncio.CancelledError):
+            await task
+
+
+app = FastAPI(title="URL Shortener", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
