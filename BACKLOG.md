@@ -34,7 +34,8 @@ Tests: keep minimal, a few smoke tests only.
 
 ## Phase 6: Next tier
 - [ ] QR codes (7)
-- [ ] Email verification + password reset, Mailpit locally (12)
+- [x] Password reset by email (12)
+- [ ] Email verification (12)
 - [ ] Profile management (13)
 - [ ] API keys (14)
 - [ ] Account overview (17)

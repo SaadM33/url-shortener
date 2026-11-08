@@ -97,8 +97,17 @@ make test
 A few smoke tests run against in-memory SQLite and never touch your dev database. CI runs them on every push.
 
 Rate limits are in-memory (per worker process, reset on restart): login 10/min and register 5/min per IP,
-link creation 30/min per user. Tune with `RATE_LOGIN_PER_MIN`, `RATE_REGISTER_PER_MIN`,
+link creation 30/min per user, forgot-password 3/min per IP. Tune with `RATE_LOGIN_PER_MIN`, `RATE_REGISTER_PER_MIN`,
 `RATE_CREATE_URL_PER_MIN`, or turn off with `RATE_LIMIT_ENABLED=false`.
+
+## Password reset and email
+
+`POST /auth/forgot-password` emails a reset link (`FRONTEND_URL/reset-password?token=...`, valid 30 minutes, single use);
+`POST /auth/reset-password` sets the new password. Changing a password logs out all existing sessions.
+
+Without `SMTP_HOST` in `.env`, emails are printed in the server log instead of sent. To test real delivery locally,
+run [Mailpit](https://mailpit.axllent.org) and set `SMTP_HOST=localhost`, `SMTP_PORT=1025`, `SMTP_STARTTLS=false`.
+Other settings: `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `RESET_TOKEN_EXPIRE_MINUTES`.
 
 ## Google sign-in (optional)
 

@@ -84,5 +84,5 @@ async def google_callback(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=403, detail="account disabled")
 
     response = RedirectResponse(url=settings.FRONTEND_URL, status_code=302)
-    set_auth_cookie(response, user.id)
+    set_auth_cookie(response, user)
     return response

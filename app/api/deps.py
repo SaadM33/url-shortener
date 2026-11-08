@@ -5,8 +5,8 @@ from jose import JWTError
 from app.db.session import get_db
 from app.models.user import User
 from app.core.config import settings
-from app.core.ratelimit import create_url_limiter, login_limiter, register_limiter
-from app.core.security import decode_access_token
+from app.core.ratelimit import create_url_limiter, forgot_limiter, login_limiter, register_limiter
+from app.core.security import decode_access_token, password_fingerprint
 
 def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
     token = request.cookies.get(settings.COOKIE_NAME)
@@ -25,6 +25,11 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
     user = db.query(User).filter(User.id == int(user_id)).first()
     if user is None:
         raise HTTPException(status_code=401, detail="user not found")
+
+    # only real session tokens (not reset tokens), and only while the password
+    # is unchanged since the token was issued
+    if payload.get("typ") != "access" or payload.get("pwf") != password_fingerprint(user.password_hash):
+        raise HTTPException(status_code=401, detail="invalid or expired token")
 
     if not user.is_active:
         raise HTTPException(status_code=403, detail="account disabled")
@@ -54,3 +59,7 @@ def limit_register(request: Request) -> None:
 
 def limit_create_url(current_user: User = Depends(get_current_user)) -> None:
     create_url_limiter.check(f"user:{current_user.id}")
+
+
+def limit_forgot(request: Request) -> None:
+    forgot_limiter.check(_client_ip(request))

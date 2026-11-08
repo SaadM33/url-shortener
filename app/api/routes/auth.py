@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.api.deps import get_current_user, limit_login, limit_register
 from app.models.user import User
-from app.core.security import hash_password, verify_password, create_access_token
+from app.core.security import create_session_token, hash_password, verify_password
 from app.core.config import settings
 from app.schemas.user import UserCreate, UserResponse, UserLogin
 
@@ -12,11 +12,8 @@ from app.schemas.user import UserCreate, UserResponse, UserLogin
 router = APIRouter()
 
 
-def set_auth_cookie(response: Response, user_id: int) -> None:
-    token = create_access_token(
-        data={"user_id": str(user_id)},
-        expires_minutes=settings.TOKEN_EXPIRE_MINUTES,
-    )
+def set_auth_cookie(response: Response, user: User) -> None:
+    token = create_session_token(user)
     response.set_cookie(
         key=settings.COOKIE_NAME,
         value=token,
@@ -52,14 +49,14 @@ def login(data: UserLogin, response: Response, db: Session = Depends(get_db)):
     if not user.is_active:
         raise HTTPException(status_code=403, detail="account disabled")
 
-    set_auth_cookie(response, user.id)
+    set_auth_cookie(response, user)
     return {"detail": "logged in"}
 
 
 @router.post("/auth/refresh")
 def refresh(response: Response, current_user: User = Depends(get_current_user)):
     """Issue a fresh token for a still-valid session (sliding expiry)."""
-    set_auth_cookie(response, current_user.id)
+    set_auth_cookie(response, current_user)
     return {"detail": "token refreshed"}
 
 

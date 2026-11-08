@@ -55,3 +55,34 @@ def test_login_is_rate_limited(make_client):
     codes = [client.post("/auth/login", json=bad).status_code for _ in range(11)]
     assert codes[:10] == [401] * 10
     assert codes[10] == 429
+
+
+def test_password_reset_flow(make_client, monkeypatch):
+    sent = []
+    monkeypatch.setattr("app.api.routes.password.send_email", lambda to, subject, body: sent.append(body))
+
+    alice = make_client("alice")  # logged in with the old password
+    anon = make_client()
+
+    # unknown emails get the same answer and no email
+    assert anon.post("/auth/forgot-password", json={"email": "ghost@example.com"}).status_code == 200
+    assert sent == []
+
+    anon.post("/auth/forgot-password", json={"email": "alice@example.com"})
+    token = sent[0].split("token=")[1].split()[0]
+
+    assert anon.post("/auth/reset-password", json={"token": token, "new_password": "short"}).status_code == 422
+    assert anon.post("/auth/reset-password", json={"token": token, "new_password": "brand-new-pw"}).status_code == 200
+
+    # link is single-use, old password and old sessions are dead, new password works
+    assert anon.post("/auth/reset-password", json={"token": token, "new_password": "another-pw1"}).status_code == 400
+    assert alice.get("/auth/me").status_code == 401
+    old = {"email": "alice@example.com", "password": "pw12345678"}
+    assert anon.post("/auth/login", json=old).status_code == 401
+    new = {"email": "alice@example.com", "password": "brand-new-pw"}
+    assert anon.post("/auth/login", json=new).status_code == 200
+
+    # a reset token is not usable as a login cookie
+    fresh = make_client()
+    fresh.cookies.set("jwt_token", token)
+    assert fresh.get("/auth/me").status_code == 401

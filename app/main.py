@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.api.routes import admin, urls, auth, google
+from app.api.routes import admin, urls, auth, google, password
 from app.core.config import settings
 
 
@@ -28,6 +28,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(google.router)
+app.include_router(password.router)
 app.include_router(admin.router)
 app.include_router(urls.router)
 
