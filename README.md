@@ -136,6 +136,8 @@ Interactive docs at `http://localhost:8000/docs`.
 
 - `GET /urls?q=&status=&sort=&order=&limit=&offset=` — your links (paginated)
 - `GET /urls/{code}/stats?days=30` — clicks per day, unique visitors, referrers, devices, browsers
+- `PATCH /auth/me` (username), `POST /auth/change-password`, `DELETE /auth/me` (body `{"password": ...}`) — profile management
+- `GET /auth/me/overview?days=30` — your link/click totals, clicks per day and top links
 - `/admin/users`, `/admin/urls`, `/admin/stats` — admin only (user management, link moderation, site stats)
 
 Clicks store the referrer hostname, device/browser and a salted hash of IP + user agent

@@ -86,3 +86,34 @@ def test_password_reset_flow(make_client, monkeypatch):
     fresh = make_client()
     fresh.cookies.set("jwt_token", token)
     assert fresh.get("/auth/me").status_code == 401
+
+
+def test_profile_overview_and_account_deletion(make_client):
+    alice, bob, visitor = make_client("alice"), make_client("bob"), make_client()
+
+    assert alice.patch("/auth/me", json={"username": "bob"}).status_code == 409
+    assert alice.patch("/auth/me", json={"username": "alice2"}).json()["username"] == "alice2"
+
+    for alias in ("one", "two"):
+        alice.post("/urls", json={"url": URL, "alias": alias})
+    visitor.get("/one", follow_redirects=False)
+    visitor.get("/one", follow_redirects=False)
+    alice.put("/urls/two", json={"is_active": False})
+
+    overview = alice.get("/auth/me/overview").json()
+    assert (overview["total_links"], overview["active_links"], overview["total_clicks"]) == (2, 1, 2)
+    assert overview["clicks_last_7_days"] == 2
+    assert overview["top_links"][0]["short_code"] == "one"
+
+    # changing the password keeps this session alive
+    bad = {"current_password": "wrong", "new_password": "a-new-password"}
+    assert alice.post("/auth/change-password", json=bad).status_code == 400
+    good = {"current_password": "pw12345678", "new_password": "a-new-password"}
+    assert alice.post("/auth/change-password", json=good).status_code == 200
+    assert alice.get("/auth/me").status_code == 200
+
+    # deleting needs the password, and takes the links with it
+    assert alice.request("DELETE", "/auth/me", json={"password": "nope"}).status_code == 400
+    assert alice.request("DELETE", "/auth/me", json={"password": "a-new-password"}).status_code == 200
+    assert visitor.get("/one", follow_redirects=False).status_code == 404
+    assert bob.get("/auth/me").status_code == 200

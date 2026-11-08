@@ -3,7 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-from app.schemas.url import CountItem, DayCount
+from app.schemas.url import DayCount, TopLink
 
 
 class AdminUserResponse(BaseModel):
@@ -34,12 +34,6 @@ class AdminURLUpdate(BaseModel):
     """is_active=False disables the link and locks it against the owner."""
 
     is_active: bool
-
-
-class TopLink(BaseModel):
-    short_code: str
-    long_url: str
-    visits: int
 
 
 class SiteStats(BaseModel):

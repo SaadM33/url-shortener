@@ -17,9 +17,8 @@ from app.schemas.admin import (
     AdminUserResponse,
     AdminUserUpdate,
     SiteStats,
-    TopLink,
 )
-from app.schemas.url import URLPage, URLResponse
+from app.schemas.url import TopLink, URLPage, URLResponse
 from app.services.stats import daily_counts, utcnow
 
 router = APIRouter(prefix="/admin", dependencies=[Depends(require_admin)])

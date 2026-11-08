@@ -84,3 +84,9 @@ class URLStats(BaseModel):
     top_referrers: list[CountItem]
     devices: list[CountItem]
     browsers: list[CountItem]
+
+
+class TopLink(BaseModel):
+    short_code: str
+    long_url: str
+    visits: int
