@@ -7,6 +7,7 @@ A small FastAPI URL shortener with SQLAlchemy models and Alembic migrations.
 - Exposes a FastAPI app in `app/main.py`
 - Cookie-based JWT auth (register, login, logout, refresh)
 - Per-user short links; only the owner can list, edit or delete them
+- Custom aliases, link expiry (date and/or max clicks), and enable/disable per link; `expires_at` is stored and returned as UTC
 - Stores data with SQLAlchemy models in `app/models/`
 - Validates payloads with Pydantic in `app/schemas/`
 - Tracks schema changes through Alembic in `alembic/`

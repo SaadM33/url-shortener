@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, true
 
 from app.db.base import Base
 
@@ -19,3 +19,11 @@ class URL(Base):
     visits = Column(Integer, default=0)
 
     created_at = Column(DateTime, default=datetime.now)
+
+    is_active = Column(Boolean, nullable=False, default=True, server_default=true())
+
+    # naive UTC; NULL means never expires
+    expires_at = Column(DateTime, nullable=True)
+
+    # NULL means unlimited visits
+    max_visits = Column(Integer, nullable=True)
