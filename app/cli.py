@@ -1,4 +1,4 @@
-"""Small admin CLI. Usage: python -m app.cli create-admin EMAIL | purge-expired"""
+"""Small admin CLI. Usage: python -m app.cli create-admin EMAIL | purge-expired | api-docs"""
 import argparse
 
 from app.db.session import SessionLocal
@@ -26,7 +26,19 @@ def main() -> None:
     sub.add_parser("create-admin", help="promote a user to admin").add_argument("email")
     sub.add_parser("remove-admin", help="demote an admin to user").add_argument("email")
     sub.add_parser("purge-expired", help="delete links that expired past the retention period")
+    sub.add_parser("api-docs", help="write docs/API.md from the OpenAPI schema")
     args = parser.parse_args()
+    if args.cmd == "api-docs":
+        from pathlib import Path
+
+        from app.main import app
+        from app.services.apidocs import render
+
+        path = Path("docs/API.md")
+        path.parent.mkdir(exist_ok=True)
+        path.write_text(render(app.openapi()))
+        print(f"wrote {path}")
+        return
     if args.cmd == "purge-expired":
         deleted = run_cleanup_once()
         print(f"deleted {deleted} link(s) expired more than {settings.EXPIRED_LINK_RETENTION_DAYS} days ago")

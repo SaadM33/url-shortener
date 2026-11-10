@@ -41,7 +41,7 @@ Tests: keep minimal, a few smoke tests only.
 - [x] Account overview (17)
 - [x] Background cleanup of expired links (26)
 - [ ] Async click recording (26)
-- [ ] API docs polish, consistent errors (29)
+- [x] API docs (29)
 - [ ] Logging + health check (30)
 
 ## Phase 7: Extras

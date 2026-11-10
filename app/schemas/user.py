@@ -10,6 +10,10 @@ class UserCreate(BaseModel):
 	password: str = PasswordStr
 	username: str
 
+	model_config = {
+		"json_schema_extra": {"examples": [{"email": "you@example.com", "password": "a-long-password", "username": "you"}]}
+	}
+
 
 class UserResponse(BaseModel):
 	id: int

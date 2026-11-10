@@ -18,6 +18,7 @@ from app.models.user import User
 from app.schemas.url import URLInput, URLPage, URLResponse, URLStats, URLUpdate
 from app.services.stats import link_stats
 from app.services.useragent import parse_user_agent, referrer_host, visitor_hash
+from app.api.docs import errors
 
 router = APIRouter()
 
@@ -69,7 +70,7 @@ def paginate_urls(query, sort: str, order: str, limit: int, offset: int) -> dict
     return {"items": items, "total": total, "limit": limit, "offset": offset}
 
 
-@router.get("/urls", response_model=URLPage)
+@router.get("/urls", response_model=URLPage, tags=["Links"], summary='List my links', description='Paginated, newest first by default. Filter with `status`, search the short code and target with `q`.', responses=errors(401, 403, 422))
 def get_urls(
     q: str | None = Query(None, max_length=200, description="search in short code and target URL"),
     status: Literal["active", "expired", "disabled"] | None = None,
@@ -93,7 +94,7 @@ def get_owned_url(code: str, db: Session, user: User) -> URL:
     return url
 
 
-@router.post("/urls", response_model=URLResponse, dependencies=[Depends(limit_create_url)])
+@router.post("/urls", response_model=URLResponse, dependencies=[Depends(limit_create_url)], tags=["Links"], summary='Create a short link', description='Random 6-character code, or pick your own with `alias` (3-50 letters, digits, `-`, `_`; reserved words not allowed). Optionally expire it by date and/or number of clicks.', responses=errors(400, 401, 403, 409, 422, 429))
 def create_url(
     data: URLInput,
     db: Session = Depends(get_db),
@@ -128,7 +129,7 @@ def create_url(
     return new_url
 
 
-@router.put("/urls/{code}", response_model=URLResponse)
+@router.put("/urls/{code}", response_model=URLResponse, tags=["Links"], summary='Update a link', description='Send only what you want to change. Send `null` for `expires_at` or `max_visits` to remove the limit. Links disabled by an admin cannot be re-enabled.', responses=errors(401, 403, 404, 422))
 def update_url(
     code: str,
     data: URLUpdate,
@@ -159,7 +160,7 @@ def update_url(
     return url
 
 
-@router.get("/urls/{code}/stats", response_model=URLStats)
+@router.get("/urls/{code}/stats", response_model=URLStats, tags=["Links"], summary='Link analytics', description='Clicks per day, unique visitors, top referrers, devices and browsers over the last `days` days (1-365). Owner or admin.', responses=errors(401, 403, 404, 422))
 def get_url_stats(
     code: str,
     days: int = Query(30, ge=1, le=365),
@@ -174,7 +175,7 @@ def get_url_stats(
     return link_stats(db, url.id, days)
 
 
-@router.delete("/urls/{code}")
+@router.delete("/urls/{code}", tags=["Links"], summary='Delete a link', description='Deletes the link and its click history.', responses=errors(401, 403, 404))
 def delete_url(
     code: str,
     db: Session = Depends(get_db),
@@ -187,7 +188,7 @@ def delete_url(
     return {"detail": "URL deleted successfully"}
 
 
-@router.get("/{code}")
+@router.get("/{code}", tags=["Redirect"], summary='Follow a short link', description='302 redirect to the target and counts the visit. 404 if the code does not exist or the link is disabled; 410 if it expired or reached its click limit.', responses=errors(404, 410))
 def redirect_to_url(code: str, request: Request, db: Session = Depends(get_db)):
     url = db.query(URL).filter(URL.short_code == code).first()
     if not url or not url.is_active or url.admin_disabled:

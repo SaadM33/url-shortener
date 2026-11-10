@@ -16,11 +16,12 @@ from app.schemas.url import TopLink
 from app.schemas.user import ChangePassword, DeleteAccount, Overview, ProfileUpdate, UserResponse
 from app.services.cleanup import delete_urls
 from app.services.stats import daily_counts, utcnow
+from app.api.docs import errors
 
 router = APIRouter()
 
 
-@router.patch("/auth/me", response_model=UserResponse)
+@router.patch("/auth/me", response_model=UserResponse, tags=["Account"], summary='Change username', description='Only the fields you send are changed.', responses=errors(401, 403, 409, 422))
 def update_profile(
     data: ProfileUpdate,
     db: Session = Depends(get_db),
@@ -36,7 +37,7 @@ def update_profile(
     return current_user
 
 
-@router.post("/auth/change-password")
+@router.post("/auth/change-password", tags=["Account"], summary='Change password', description='Needs the current password (omit it only for Google-only accounts that have none). Other sessions are logged out; this one stays logged in.', responses=errors(400, 401, 403, 422))
 def change_password(
     data: ChangePassword,
     response: Response,
@@ -54,7 +55,7 @@ def change_password(
     return {"detail": "password updated"}
 
 
-@router.delete("/auth/me")
+@router.delete("/auth/me", tags=["Account"], summary='Delete my account', description='Deletes the account and all its links and click history. Send `{"password": ...}` in the body. The last admin cannot delete themselves.', responses=errors(400, 401, 403))
 def delete_account(
     response: Response,
     data: DeleteAccount | None = None,
@@ -86,7 +87,7 @@ def delete_account(
     return {"detail": "account and links deleted"}
 
 
-@router.get("/auth/me/overview", response_model=Overview)
+@router.get("/auth/me/overview", response_model=Overview, tags=["Account"], summary='Account overview', description='Your link and click totals, clicks per day for the last `days` days (1-365), and your top 5 links.', responses=errors(401, 403))
 def account_overview(
     days: int = 30,
     db: Session = Depends(get_db),

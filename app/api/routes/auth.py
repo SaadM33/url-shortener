@@ -7,7 +7,7 @@ from app.models.user import User
 from app.core.security import create_session_token, hash_password, verify_password
 from app.core.config import settings
 from app.schemas.user import UserCreate, UserResponse, UserLogin
-
+from app.api.docs import errors
 
 router = APIRouter()
 
@@ -24,11 +24,11 @@ def set_auth_cookie(response: Response, user: User) -> None:
     )
 
 
-@router.get("/auth/me", response_model=UserResponse)
+@router.get("/auth/me", response_model=UserResponse, tags=["Auth"], summary='Who am I', description='Returns the logged-in user.', responses=errors(401, 403))
 def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user
 
-@router.post("/auth/register", response_model=UserResponse, dependencies=[Depends(limit_register)])
+@router.post("/auth/register", response_model=UserResponse, dependencies=[Depends(limit_register)], tags=["Auth"], summary='Create an account', description='Registers with email, username and a password of 8 to 72 characters. Does not log you in.', responses=errors(400, 422, 429))
 def register(data: UserCreate, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == data.email).first()
     if existing:
@@ -41,7 +41,7 @@ def register(data: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-@router.post("/auth/login", dependencies=[Depends(limit_login)])
+@router.post("/auth/login", dependencies=[Depends(limit_login)], tags=["Auth"], summary='Log in', description='Checks email and password and sets the session cookie. Banned accounts get 403.', responses=errors(401, 403, 429))
 def login(data: UserLogin, response: Response, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
     if not user or not verify_password(data.password, user.password_hash):
@@ -53,14 +53,14 @@ def login(data: UserLogin, response: Response, db: Session = Depends(get_db)):
     return {"detail": "logged in"}
 
 
-@router.post("/auth/refresh")
+@router.post("/auth/refresh", tags=["Auth"], summary='Extend the session', description='Issues a fresh cookie with a new expiry for a still-valid session.', responses=errors(401, 403))
 def refresh(response: Response, current_user: User = Depends(get_current_user)):
     """Issue a fresh token for a still-valid session (sliding expiry)."""
     set_auth_cookie(response, current_user)
     return {"detail": "token refreshed"}
 
 
-@router.post("/auth/logout")
+@router.post("/auth/logout", tags=["Auth"], summary='Log out', description='Clears the session cookie. Safe to call when not logged in.')
 def logout(response: Response):
     response.delete_cookie(
         key=settings.COOKIE_NAME,

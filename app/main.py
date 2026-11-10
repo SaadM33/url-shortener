@@ -7,6 +7,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.api.routes import admin, urls, auth, google, password, profile
 from app.core.config import settings
+from app.api.docs import DESCRIPTION, TAGS
 from app.services.cleanup import cleanup_loop
 
 
@@ -20,7 +21,13 @@ async def lifespan(app: FastAPI):
             await task
 
 
-app = FastAPI(title="URL Shortener", lifespan=lifespan)
+app = FastAPI(
+    title="URL Shortener",
+    version="1.0.0",
+    description=DESCRIPTION,
+    openapi_tags=TAGS,
+    lifespan=lifespan,
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -48,6 +55,6 @@ app.include_router(admin.router)
 app.include_router(urls.router)
 
 
-@app.get("/")
+@app.get("/", tags=["Meta"], summary="Service status")
 def home():
     return {"message": "URL shorener is running 👍"}

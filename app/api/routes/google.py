@@ -9,6 +9,7 @@ from app.api.routes.auth import set_auth_cookie
 from app.core.config import settings
 from app.db.session import get_db
 from app.models.user import User
+from app.api.docs import errors
 
 router = APIRouter()
 
@@ -58,13 +59,13 @@ def get_or_create_google_user(db: Session, sub: str, email: str, email_verified:
     return user
 
 
-@router.get("/auth/google/login")
+@router.get("/auth/google/login", tags=["Auth"], summary='Start Google sign-in', description='Redirects the browser to Google. Open it as a page, not via fetch.', responses=errors(503))
 async def google_login(request: Request):
     _require_configured()
     return await oauth.google.authorize_redirect(request, settings.GOOGLE_REDIRECT_URI)
 
 
-@router.get("/auth/google/callback")
+@router.get("/auth/google/callback", tags=["Auth"], summary='Finish Google sign-in', description='Google redirects here. Links to an existing account when the email matches and Google verified it, otherwise creates one, sets the cookie and redirects to the frontend.', responses=errors(400, 403, 503))
 async def google_callback(request: Request, db: Session = Depends(get_db)):
     _require_configured()
     try:

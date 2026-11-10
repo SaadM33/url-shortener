@@ -14,11 +14,12 @@ from app.db.session import get_db
 from app.models.user import User
 from app.schemas.user import ForgotPassword, ResetPassword
 from app.services.email import send_email
+from app.api.docs import errors
 
 router = APIRouter()
 
 
-@router.post("/auth/forgot-password", dependencies=[Depends(limit_forgot)])
+@router.post("/auth/forgot-password", dependencies=[Depends(limit_forgot)], tags=["Auth"], summary='Request a password reset email', description='Always answers the same way, whether or not the email is registered. The emailed link is valid for 30 minutes and works once.', responses=errors(422, 429))
 def forgot_password(data: ForgotPassword, background: BackgroundTasks, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == data.email).first()
     if user and user.is_active:
@@ -33,7 +34,7 @@ def forgot_password(data: ForgotPassword, background: BackgroundTasks, db: Sessi
     return {"detail": "If that email is registered, a reset link has been sent"}
 
 
-@router.post("/auth/reset-password", dependencies=[Depends(limit_login)])
+@router.post("/auth/reset-password", dependencies=[Depends(limit_login)], tags=["Auth"], summary='Set a new password from a reset token', description='Uses the token from the reset email. Afterwards every existing session is logged out.', responses=errors(400, 422, 429))
 def reset_password(data: ResetPassword, db: Session = Depends(get_db)):
     invalid = HTTPException(status_code=400, detail="invalid or expired reset token")
     try:

@@ -15,10 +15,20 @@ def _to_naive_utc(value: datetime | None) -> datetime | None:
 
 
 class URLInput(BaseModel):
-    url: AnyHttpUrl
-    alias: str | None = Field(default=None, pattern=ALIAS_PATTERN)
-    expires_at: datetime | None = None
-    max_visits: int | None = Field(default=None, gt=0)
+    url: AnyHttpUrl = Field(description="The page to redirect to (http or https).")
+    alias: str | None = Field(
+        default=None,
+        pattern=ALIAS_PATTERN,
+        description="Custom short code. Leave out for a random 6-character one.",
+    )
+    expires_at: datetime | None = Field(default=None, description="Stop redirecting after this time (UTC, must be in the future).")
+    max_visits: int | None = Field(default=None, gt=0, description="Stop redirecting after this many clicks.")
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [{"url": "https://example.com/some/long/page", "alias": "my-page", "max_visits": 100}]
+        }
+    }
 
     @field_validator("expires_at")
     @classmethod
@@ -32,10 +42,10 @@ class URLInput(BaseModel):
 class URLUpdate(BaseModel):
     """All fields optional. Send null for expires_at/max_visits to clear them."""
 
-    url: AnyHttpUrl | None = None
-    expires_at: datetime | None = None
-    max_visits: int | None = Field(default=None, gt=0)
-    is_active: bool | None = None
+    url: AnyHttpUrl | None = Field(default=None, description="New target URL.")
+    expires_at: datetime | None = Field(default=None, description="New expiry (UTC), or null to remove it.")
+    max_visits: int | None = Field(default=None, gt=0, description="New click limit, or null to remove it.")
+    is_active: bool | None = Field(default=None, description="false disables the link (404), true re-enables it.")
 
     @field_validator("expires_at")
     @classmethod

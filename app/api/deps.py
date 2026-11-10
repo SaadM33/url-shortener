@@ -1,4 +1,5 @@
 from fastapi import Depends, HTTPException, Request
+from fastapi.security import APIKeyCookie
 from sqlalchemy.orm import Session
 from jose import JWTError
 
@@ -8,7 +9,19 @@ from app.core.config import settings
 from app.core.ratelimit import create_url_limiter, forgot_limiter, login_limiter, register_limiter
 from app.core.security import decode_access_token, password_fingerprint
 
-def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
+# Only declares the cookie to OpenAPI (lock icons in /docs); get_current_user does the real check.
+cookie_scheme = APIKeyCookie(
+    name=settings.COOKIE_NAME,
+    auto_error=False,
+    description="Session cookie set by POST /auth/login. Log in via /docs first and it is sent automatically.",
+)
+
+
+def get_current_user(
+    request: Request,
+    db: Session = Depends(get_db),
+    _cookie: str | None = Depends(cookie_scheme),
+) -> User:
     token = request.cookies.get(settings.COOKIE_NAME)
     if not token:
         raise HTTPException(status_code=401, detail="not authenticated")
