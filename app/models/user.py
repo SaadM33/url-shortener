@@ -24,3 +24,7 @@ class User(Base):
 	is_active = Column(Boolean, nullable=False, default=True, server_default=true())
 
 	created_at = Column(DateTime, default=datetime.now)
+
+	@property
+	def has_password(self) -> bool:
+		return bool(self.password_hash)

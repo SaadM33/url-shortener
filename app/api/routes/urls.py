@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import and_, func, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -160,6 +160,20 @@ def update_url(
     return url
 
 
+@router.get("/urls/{code}", response_model=URLResponse, tags=["Links"], summary='Get one link', description='Owner or admin.', responses=errors(401, 403, 404))
+def get_url(
+    code: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    url = db.query(URL).filter(URL.short_code == code).first()
+    if not url:
+        raise HTTPException(status_code=404, detail="short code not found")
+    if url.owner_id != current_user.id and current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="not your link")
+    return url
+
+
 @router.get("/urls/{code}/stats", response_model=URLStats, tags=["Links"], summary='Link analytics', description='Clicks per day, unique visitors, top referrers, devices and browsers over the last `days` days (1-365). Owner or admin.', responses=errors(401, 403, 404, 422))
 def get_url_stats(
     code: str,
@@ -188,15 +202,31 @@ def delete_url(
     return {"detail": "URL deleted successfully"}
 
 
+_UNAVAILABLE_PAGE = """<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>{title}</title>
+<style>body{{font:16px/1.5 system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0;
+background:#f8fafc;color:#0f172a}}@media (prefers-color-scheme:dark){{body{{background:#0b1120;color:#e2e8f0}}}}
+main{{text-align:center;padding:24px;max-width:28rem}}h1{{font-size:1.5rem;margin:0 0 8px}}p{{opacity:.75;margin:0}}</style>
+</head><body><main><h1>{title}</h1><p>{text}</p></main></body></html>"""
+
+
+def _unavailable(request: Request, status: int, detail: str, title: str, text: str):
+    """Browsers get a small page; API clients keep the JSON error."""
+    if "text/html" in request.headers.get("accept", ""):
+        return HTMLResponse(_UNAVAILABLE_PAGE.format(title=title, text=text), status_code=status)
+    raise HTTPException(status_code=status, detail=detail)
+
+
 @router.get("/{code}", tags=["Redirect"], summary='Follow a short link', description='302 redirect to the target and counts the visit. 404 if the code does not exist or the link is disabled; 410 if it expired or reached its click limit.', responses=errors(404, 410))
 def redirect_to_url(code: str, request: Request, db: Session = Depends(get_db)):
     url = db.query(URL).filter(URL.short_code == code).first()
     if not url or not url.is_active or url.admin_disabled:
-        raise HTTPException(status_code=404, detail="short code not found")
+        return _unavailable(request, 404, "short code not found", "Link not found",
+                            "This short link doesn't exist or has been turned off.")
 
     now = utcnow()
     if url.expires_at is not None and url.expires_at <= now:
-        raise HTTPException(status_code=410, detail="link expired")
+        return _unavailable(request, 410, "link expired", "Link expired", "This short link is no longer active.")
 
     # one atomic UPDATE both counts the visit and enforces the click limit,
     # so concurrent hits can't slip past max_visits
@@ -210,7 +240,7 @@ def redirect_to_url(code: str, request: Request, db: Session = Depends(get_db)):
     )
     if updated == 0:
         db.commit()
-        raise HTTPException(status_code=410, detail="link expired")
+        return _unavailable(request, 410, "link expired", "Link expired", "This short link is no longer active.")
 
     # record the counted visit in the same transaction
     ua = request.headers.get("user-agent")

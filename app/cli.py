@@ -26,7 +26,7 @@ def main() -> None:
     sub.add_parser("create-admin", help="promote a user to admin").add_argument("email")
     sub.add_parser("remove-admin", help="demote an admin to user").add_argument("email")
     sub.add_parser("purge-expired", help="delete links that expired past the retention period")
-    sub.add_parser("api-docs", help="write docs/API.md from the OpenAPI schema")
+    sub.add_parser("api-docs", help="write docs/API.md and docs/openapi.json from the OpenAPI schema")
     args = parser.parse_args()
     if args.cmd == "api-docs":
         from pathlib import Path
@@ -34,10 +34,13 @@ def main() -> None:
         from app.main import app
         from app.services.apidocs import render
 
-        path = Path("docs/API.md")
-        path.parent.mkdir(exist_ok=True)
-        path.write_text(render(app.openapi()))
-        print(f"wrote {path}")
+        import json
+
+        spec = app.openapi()
+        Path("docs").mkdir(exist_ok=True)
+        Path("docs/API.md").write_text(render(spec))
+        Path("docs/openapi.json").write_text(json.dumps(spec, indent=2) + "\n")
+        print("wrote docs/API.md and docs/openapi.json")
         return
     if args.cmd == "purge-expired":
         deleted = run_cleanup_once()

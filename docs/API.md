@@ -75,6 +75,14 @@ Clears the session cookie. Safe to call when not logged in.
 
 Responses: `200` Successful Response
 
+### `GET /auth/providers`
+
+**Available sign-in methods**
+
+Lets the frontend show the Google button only when Google sign-in is configured.
+
+Responses: `200` Successful Response
+
 ### `GET /auth/google/login`
 
 **Start Google sign-in**
@@ -87,9 +95,9 @@ Responses: `200` Successful Response · `503` Feature not configured on this ser
 
 **Finish Google sign-in**
 
-Google redirects here. Links to an existing account when the email matches and Google verified it, otherwise creates one, sets the cookie and redirects to the frontend.
+Google redirects here. Links to an existing account when the email matches and Google verified it, otherwise creates one, sets the cookie and redirects to the frontend. On failure it redirects to `FRONTEND_URL/login?error=...`.
 
-Responses: `200` Successful Response · `400` Invalid request (see `detail`) · `403` Not allowed · `503` Feature not configured on this server
+Responses: `200` Successful Response
 
 ### `POST /auth/forgot-password`
 
@@ -219,6 +227,20 @@ JSON body:
 | `max_visits` | integer or null | no | Stop redirecting after this many clicks |
 
 Responses: `200` [URLResponse](#urlresponse) · `400` Invalid request (see `detail`) · `401` Not logged in, or the session expired · `403` Not allowed · `409` Conflict: already exists · `429` Too many requests; wait for `Retry-After` seconds · `422` validation error
+
+### `GET /urls/{code}` 🔒
+
+**Get one link**
+
+Owner or admin.
+
+Path parameters:
+
+| Name | Type | Required | Notes |
+|---|---|---|---|
+| `code` | string | yes |  |
+
+Responses: `200` [URLResponse](#urlresponse) · `401` Not logged in, or the session expired · `403` Not allowed · `404` Not found · `422` validation error
 
 ### `PUT /urls/{code}` 🔒
 
@@ -642,3 +664,4 @@ Responses: `200` Successful Response
 | `email` | string | yes |  |
 | `username` | string | yes |  |
 | `role` | string | yes |  |
+| `has_password` | boolean | yes |  |

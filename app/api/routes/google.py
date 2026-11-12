@@ -59,30 +59,43 @@ def get_or_create_google_user(db: Session, sub: str, email: str, email_verified:
     return user
 
 
+@router.get("/auth/providers", tags=["Auth"], summary="Available sign-in methods",
+            description="Lets the frontend show the Google button only when Google sign-in is configured.")
+def providers():
+    return {"password": True, "google": bool(settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_SECRET)}
+
+
+def _back_to_login(error: str) -> RedirectResponse:
+    return RedirectResponse(url=f"{settings.FRONTEND_URL}/login?error={error}", status_code=302)
+
+
 @router.get("/auth/google/login", tags=["Auth"], summary='Start Google sign-in', description='Redirects the browser to Google. Open it as a page, not via fetch.', responses=errors(503))
 async def google_login(request: Request):
     _require_configured()
     return await oauth.google.authorize_redirect(request, settings.GOOGLE_REDIRECT_URI)
 
 
-@router.get("/auth/google/callback", tags=["Auth"], summary='Finish Google sign-in', description='Google redirects here. Links to an existing account when the email matches and Google verified it, otherwise creates one, sets the cookie and redirects to the frontend.', responses=errors(400, 403, 503))
+@router.get("/auth/google/callback", tags=["Auth"], summary='Finish Google sign-in', description='Google redirects here. Links to an existing account when the email matches and Google verified it, otherwise creates one, sets the cookie and redirects to the frontend. On failure it redirects to `FRONTEND_URL/login?error=...`.')
 async def google_callback(request: Request, db: Session = Depends(get_db)):
-    _require_configured()
+    # this is a browser redirect, so failures go back to the login page instead of showing JSON
+    if not (settings.GOOGLE_CLIENT_ID and settings.GOOGLE_CLIENT_SECRET):
+        return _back_to_login("google_unavailable")
     try:
         token = await oauth.google.authorize_access_token(request)
     except OAuthError:
-        raise HTTPException(status_code=400, detail="Google login failed")
+        return _back_to_login("google_failed")
 
     info = token.get("userinfo")
     if not info or not info.get("email"):
-        raise HTTPException(status_code=400, detail="Google did not return an email")
+        return _back_to_login("google_no_email")
 
-    user = get_or_create_google_user(
-        db, info["sub"], info["email"], bool(info.get("email_verified"))
-    )
+    try:
+        user = get_or_create_google_user(db, info["sub"], info["email"], bool(info.get("email_verified")))
+    except HTTPException:
+        return _back_to_login("google_unverified")
 
     if not user.is_active:
-        raise HTTPException(status_code=403, detail="account disabled")
+        return _back_to_login("account_disabled")
 
     response = RedirectResponse(url=settings.FRONTEND_URL, status_code=302)
     set_auth_cookie(response, user)
