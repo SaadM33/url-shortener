@@ -4,14 +4,10 @@ React + TypeScript single-page app for the URL shortener API.
 
 ## Run it
 
-The API must be running first (`make dev` in the repo root, on `http://localhost:8000`).
+From the repo root: `make api` in one terminal, `make web` in another (http://localhost:3000).
+Or run everything in Docker with `make up`; this folder's `Dockerfile` builds the app and serves it with nginx.
 
-```bash
-npm install
-npm run dev        # http://localhost:3000
-```
-
-Port 3000 taken? `PORT=3010 npm run dev`, and set `FRONTEND_URL=http://localhost:3010` in the backend's `.env`
+Port 3000 taken? `PORT=3010 make web`, and set `FRONTEND_URL=http://localhost:3010` in `backend/.env`
 (CORS, Google sign-in and password-reset links all point there). API on another address? Copy `.env.example`
 to `.env.local` and set `VITE_API_URL`.
 

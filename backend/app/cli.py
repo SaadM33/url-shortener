@@ -37,10 +37,12 @@ def main() -> None:
         import json
 
         spec = app.openapi()
-        Path("docs").mkdir(exist_ok=True)
-        Path("docs/API.md").write_text(render(spec))
-        Path("docs/openapi.json").write_text(json.dumps(spec, indent=2) + "\n")
-        print("wrote docs/API.md and docs/openapi.json")
+        # repo-root docs/, independent of the current working directory
+        docs = Path(__file__).resolve().parents[2] / "docs"
+        docs.mkdir(exist_ok=True)
+        (docs / "API.md").write_text(render(spec))
+        (docs / "openapi.json").write_text(json.dumps(spec, indent=2) + "\n")
+        print(f"wrote {docs / 'API.md'} and {docs / 'openapi.json'}")
         return
     if args.cmd == "purge-expired":
         deleted = run_cleanup_once()
