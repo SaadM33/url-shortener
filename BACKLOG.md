@@ -1,4 +1,4 @@
-# Backlog (main branch, built by Claude)
+# Backlog
 
 Runs locally on WSL. Docker-compose for MySQL. `.env` stays as is. Frontend comes after the backend is done.
 Tests: keep minimal, a few smoke tests only.
