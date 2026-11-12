@@ -33,7 +33,7 @@ Tests: keep minimal, a few smoke tests only.
 - [x] In-memory rate limiting on login and link creation (24)
 
 ## Phase 6: Next tier
-- [ ] QR codes (7)
+- [x] QR codes (7, generated in the frontend)
 - [x] Password reset by email (12)
 - [ ] Email verification (12)
 - [x] Profile management (13)
@@ -51,6 +51,9 @@ Tests: keep minimal, a few smoke tests only.
 - [ ] Guest links (9)
 - [ ] CSV export (18)
 - [ ] Audit log (23)
+
+## Frontend
+- [x] React app: auth, dashboard, links, stats, settings, admin
 
 ## Later (nice to have)
 - [ ] Redis: rate limiting (24) and redirect caching (25)

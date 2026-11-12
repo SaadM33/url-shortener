@@ -1,9 +1,11 @@
-.PHONY: docs docker-up docker-down test create-admin install dev run mysql-dev upgrade downgrade revision help
+.PHONY: web web-install docs docker-up docker-down test create-admin install dev run mysql-dev upgrade downgrade revision help
 
 PYTHON ?= python3
 
 help:
 	@echo "Available commands:"
+	@echo "  make web-install  Install frontend dependencies"
+	@echo "  make web          Run the frontend dev server (http://localhost:3000)"
 	@echo "  make docs         Regenerate docs/API.md from the OpenAPI schema"
 	@echo "  make docker-up    Build and run app + MySQL in Docker (APP_PORT=8000 by default)"
 	@echo "  make docker-down  Stop the Docker stack"
@@ -17,8 +19,15 @@ help:
 	@echo "  make downgrade    Roll back the latest migration"
 	@echo "  make revision     Create a new Alembic revision with autogenerate"
 
+web-install:
+	cd frontend && npm install
+
+web:
+	cd frontend && npm run dev
+
 docs:
 	$(PYTHON) -W ignore -m app.cli api-docs
+	cd frontend && npm run gen:api
 
 docker-up:
 	docker compose up --build
