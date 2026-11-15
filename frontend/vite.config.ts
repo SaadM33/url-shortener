@@ -2,17 +2,21 @@ import { fileURLToPath, URL } from 'node:url'
 
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 
-const port = Number(process.env.PORT) || 3000
+// the project's single .env lives one level up, at the repo root
+const envDir = fileURLToPath(new URL('..', import.meta.url))
 
-export default defineConfig({
-  plugins: [react(), tailwindcss()],
-  resolve: {
-    alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
-  },
-  // the API's CORS and redirects expect the frontend at FRONTEND_URL (localhost:3000 by default);
-  // if you change PORT here, set FRONTEND_URL in the backend's .env to match
-  server: { port, strictPort: true, host: 'localhost' },
-  preview: { port, strictPort: true, host: 'localhost' },
+export default defineConfig(({ mode }) => {
+  const port = Number(loadEnv(mode, envDir, '').WEB_PORT) || 3000
+  return {
+    envDir,
+    plugins: [react(), tailwindcss()],
+    resolve: {
+      alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
+    },
+    // must match FRONTEND_URL in .env (CORS, Google sign-in and reset links point there)
+    server: { port, strictPort: true, host: 'localhost' },
+    preview: { port, strictPort: true, host: 'localhost' },
+  }
 })

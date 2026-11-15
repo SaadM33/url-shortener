@@ -1,4 +1,9 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
+
+# the single .env at the repo root (absent inside containers, which get env vars instead)
+ENV_FILE = Path(__file__).resolve().parents[3] / ".env"
 
 
 class Settings(BaseSettings):
@@ -44,7 +49,8 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = "http://localhost:3000"
 
     class Config:
-        env_file = ".env"
+        env_file = ENV_FILE
+        extra = "ignore"  # the shared .env also holds frontend and compose settings
 
 
 settings = Settings()
