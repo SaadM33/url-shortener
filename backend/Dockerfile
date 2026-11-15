@@ -12,4 +12,5 @@ COPY app ./app
 
 EXPOSE 8000
 # apply migrations, then serve
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+# --proxy-headers: behind a reverse proxy, read the visitor's real IP from X-Forwarded-For
+CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --proxy-headers --forwarded-allow-ips '*'"]

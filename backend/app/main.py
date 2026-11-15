@@ -1,12 +1,15 @@
 import asyncio
 from contextlib import asynccontextmanager, suppress
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.api.routes import admin, urls, auth, google, password, profile
 from app.core.config import settings
+from app.db.session import get_db
 from app.api.docs import DESCRIPTION, TAGS
 from app.services.cleanup import cleanup_loop
 
@@ -46,6 +49,13 @@ app.add_middleware(
     same_site="lax",
     https_only=settings.COOKIE_SECURE,
 )
+
+# before the routers: the short-link route /{code} would otherwise catch /health
+@app.get("/health", tags=["Meta"], summary="Health check", description="200 when the API can reach its database.")
+def health(db: Session = Depends(get_db)):
+    db.execute(text("SELECT 1"))
+    return {"status": "ok"}
+
 
 app.include_router(auth.router)
 app.include_router(google.router)

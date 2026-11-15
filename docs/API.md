@@ -446,6 +446,14 @@ Responses: `200` [SiteStats](#sitestats) · `401` Not logged in, or the session 
 
 Service status.
 
+### `GET /health`
+
+**Health check**
+
+200 when the API can reach its database.
+
+Responses: `200` Successful Response
+
 ### `GET /`
 
 **Service status**
