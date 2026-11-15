@@ -1,0 +1,11 @@
+# Caddy gets and renews the HTTPS certificates for both names by itself.
+# DOMAIN comes from .env.production (e.g. rift.link).
+
+{$DOMAIN} {
+	reverse_proxy api:8000
+}
+
+app.{$DOMAIN} {
+	encode gzip
+	reverse_proxy web:80
+}

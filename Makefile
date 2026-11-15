@@ -1,10 +1,11 @@
 # `make` lists every target. Backend lives in backend/, frontend in frontend/, settings in .env.
 .DEFAULT_GOAL := help
-.PHONY: help up down logs install db api web migrate revision downgrade test lint docs admin
+.PHONY: help up down logs install db api web migrate revision downgrade test lint docs admin prod prod-logs backup
 
 include .env
 
 PYTHON ?= python3
+PROD := docker compose -f compose.prod.yml --env-file .env --env-file .env.production
 
 help: ## Show this list
 	@awk 'BEGIN {FS = ":.*## "} /^## / {printf "\n%s\n", substr($$0, 4)} /^[a-z-]+:.*## / {printf "  make %-10s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -67,3 +68,14 @@ admin: ## Make a registered user an admin: make admin EMAIL=you@example.com
 	@test -n "$(EMAIL)" || (echo "usage: make admin EMAIL=you@example.com"; exit 1)
 	cd backend && $(PYTHON) -W ignore -m app.cli create-admin $(EMAIL)
 
+## Production (run these on the server; needs .env.production, see README)
+prod: ## Build and (re)start the production stack
+	$(PROD) up -d --build
+
+prod-logs: ## Follow the production logs
+	$(PROD) logs -f
+
+backup: ## Dump the production database to backups/YYYY-MM-DD.sql.gz
+	@mkdir -p backups
+	$(PROD) exec -T db sh -c 'mysqldump -u root -p"$$MYSQL_ROOT_PASSWORD" --single-transaction url_shortener' | gzip > backups/$$(date +%F).sql.gz
+	@echo "wrote backups/$$(date +%F).sql.gz"

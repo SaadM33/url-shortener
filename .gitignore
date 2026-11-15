@@ -5,3 +5,7 @@ __pycache__/
 /
 .vscode/settings.json
 SQLALCHEMY_MYSQL_GUIDE.md
+
+# server-only secrets and database dumps
+.env.production
+backups/
