@@ -45,8 +45,8 @@ class Settings(BaseSettings):
     # Google OAuth is optional; endpoints return 503 until these are set
     GOOGLE_CLIENT_ID: str | None = None
     GOOGLE_CLIENT_SECRET: str | None = None
-    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/auth/google/callback"
-    FRONTEND_URL: str = "http://localhost:3000"
+    GOOGLE_REDIRECT_URI: str = "http://localhost:8100/auth/google/callback"
+    FRONTEND_URL: str = "http://localhost:3100"
 
     class Config:
         env_file = ENV_FILE

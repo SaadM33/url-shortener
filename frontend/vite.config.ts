@@ -8,7 +8,7 @@ import { defineConfig, loadEnv } from 'vite'
 const envDir = fileURLToPath(new URL('..', import.meta.url))
 
 export default defineConfig(({ mode }) => {
-  const port = Number(loadEnv(mode, envDir, '').WEB_PORT) || 3000
+  const port = Number(loadEnv(mode, envDir, '').WEB_PORT) || 3100
   return {
     envDir,
     plugins: [react(), tailwindcss()],

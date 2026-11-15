@@ -1,5 +1,5 @@
 # Whole stack on your machine: `make up`. Ports and settings come from .env.
-#   web http://localhost:3000   api http://localhost:8000   MySQL :3308
+#   web http://localhost:3100   api http://localhost:8100   MySQL :3308
 services:
   db:
     image: mysql:8.4
