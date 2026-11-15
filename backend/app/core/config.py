@@ -26,7 +26,9 @@ class Settings(BaseSettings):
     CLEANUP_INTERVAL_MINUTES: int = 60
     EXPIRED_LINK_RETENTION_DAYS: int = 30
 
-    # in-memory rate limits (requests per minute); see app/core/ratelimit.py
+    # Rate limits (requests per minute), kept in Redis when REDIS_URL is set,
+    # otherwise in this process's memory; see app/core/ratelimit.py
+    REDIS_URL: str = ""
     RATE_LIMIT_ENABLED: bool = True
     RATE_LOGIN_PER_MIN: int = 10  # per client IP
     RATE_REGISTER_PER_MIN: int = 5  # per client IP

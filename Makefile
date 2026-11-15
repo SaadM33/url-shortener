@@ -10,7 +10,7 @@ help: ## Show this list
 	@awk 'BEGIN {FS = ":.*## "} /^## / {printf "\n%s\n", substr($$0, 4)} /^[a-z-]+:.*## / {printf "  make %-10s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 ## Docker: the whole stack on your machine
-up: ## Build and start db + api + web
+up: ## Build and start db + redis + api + web
 	docker compose up --build -d
 	@echo "web: http://localhost:$(WEB_PORT)   api docs: http://localhost:$(API_PORT)/docs"
 
@@ -20,17 +20,19 @@ down: ## Stop the stack (data is kept)
 logs: ## Follow the stack's logs
 	docker compose logs -f
 
-## Local development (app on your machine, MySQL in Docker)
+## Local development (app on your machine, MySQL and Redis in Docker)
 install: ## Install backend and frontend dependencies
 	$(PYTHON) -m pip install -r backend/requirements.txt -r backend/requirements-dev.txt
 	cd frontend && npm install
 
-db: ## Start local MySQL (mysql-dev, :3307)
+db: ## Start local MySQL (mysql-dev, :3307) and Redis (redis-dev, :6380)
+	@docker ps -a --format '{{.Names}}' | grep -qx redis-dev || docker run -d --name redis-dev -p 6380:6379 redis:7-alpine >/dev/null
+	@docker start redis-dev >/dev/null
 	@docker ps -a --format '{{.Names}}' | grep -qx mysql-dev || docker run -d --name mysql-dev \
 		-e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=url_shortener -p 3307:3306 mysql:debian >/dev/null
 	@docker start mysql-dev >/dev/null
 	@for i in $$(seq 1 30); do \
-		docker exec mysql-dev mysqladmin ping -h127.0.0.1 -proot --silent >/dev/null 2>&1 && echo "mysql-dev is ready" && exit 0; \
+		docker exec mysql-dev mysqladmin ping -h127.0.0.1 -proot --silent >/dev/null 2>&1 && echo "mysql-dev and redis-dev are ready" && exit 0; \
 		sleep 1; \
 	done; echo "mysql-dev did not become ready"; exit 1
 

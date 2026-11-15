@@ -4,6 +4,7 @@ import os
 # touch the dev database configured in .env.
 os.environ["DATABASE_URL"] = "sqlite://"
 os.environ["JWT_KEY"] = "test-key"
+os.environ["REDIS_URL"] = ""  # in-memory rate limits, so tests don't need Redis
 
 import pytest
 from fastapi.testclient import TestClient
