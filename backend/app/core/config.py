@@ -16,6 +16,10 @@ class Settings(BaseSettings):
 
     RESET_TOKEN_EXPIRE_MINUTES: int = 30
 
+    # new accounts must click the emailed link before they can create links
+    REQUIRE_EMAIL_VERIFICATION: bool = True
+    VERIFY_TOKEN_EXPIRE_MINUTES: int = 24 * 60
+
     COOKIE_NAME: str = "jwt_token"
     COOKIE_SECURE: bool = False
     COOKIE_SAMESITE: str = "lax"
@@ -34,6 +38,7 @@ class Settings(BaseSettings):
     RATE_REGISTER_PER_MIN: int = 5  # per client IP
     RATE_CREATE_URL_PER_MIN: int = 30  # per user
     RATE_FORGOT_PER_MIN: int = 3  # per client IP
+    RATE_RESEND_VERIFY_PER_MIN: int = 2  # per user
 
     # Outgoing email. With SMTP_HOST unset, emails are printed to the server log
     # instead of sent (handy locally; Mailpit works too: host localhost, port 1025).

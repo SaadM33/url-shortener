@@ -62,3 +62,7 @@ class Overview(BaseModel):
     clicks_last_7_days: int
     clicks_by_day: list[DayCount]
     top_links: list[TopLink]
+
+
+class VerifyEmail(BaseModel):
+    token: str

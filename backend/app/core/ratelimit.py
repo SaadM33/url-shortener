@@ -81,5 +81,6 @@ login_limiter = RateLimiter("login", lambda: settings.RATE_LOGIN_PER_MIN)
 register_limiter = RateLimiter("register", lambda: settings.RATE_REGISTER_PER_MIN)
 create_url_limiter = RateLimiter("create_url", lambda: settings.RATE_CREATE_URL_PER_MIN)
 forgot_limiter = RateLimiter("forgot", lambda: settings.RATE_FORGOT_PER_MIN)
+resend_verify_limiter = RateLimiter("resend_verify", lambda: settings.RATE_RESEND_VERIFY_PER_MIN)
 
-ALL_LIMITERS = [login_limiter, register_limiter, create_url_limiter, forgot_limiter]
+ALL_LIMITERS = [login_limiter, register_limiter, create_url_limiter, forgot_limiter, resend_verify_limiter]

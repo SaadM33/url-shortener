@@ -6,7 +6,7 @@ from jose import JWTError
 from app.db.session import get_db
 from app.models.user import User
 from app.core.config import settings
-from app.core.ratelimit import create_url_limiter, forgot_limiter, login_limiter, register_limiter
+from app.core.ratelimit import create_url_limiter, forgot_limiter, login_limiter, register_limiter, resend_verify_limiter
 from app.core.security import decode_access_token, password_fingerprint
 
 # Only declares the cookie to OpenAPI (lock icons in /docs); get_current_user does the real check.
@@ -76,3 +76,7 @@ def limit_create_url(current_user: User = Depends(get_current_user)) -> None:
 
 def limit_forgot(request: Request) -> None:
     forgot_limiter.check(_client_ip(request))
+
+
+def limit_resend_verify(current_user: User = Depends(get_current_user)) -> None:
+    resend_verify_limiter.check(f"user:{current_user.id}")

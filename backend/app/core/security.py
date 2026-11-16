@@ -44,3 +44,11 @@ def create_reset_token(user) -> str:
         data={"user_id": str(user.id), "typ": "reset", "pwf": password_fingerprint(user.password_hash)},
         expires_minutes=settings.RESET_TOKEN_EXPIRE_MINUTES,
     )
+
+
+def create_verify_token(user) -> str:
+    # tied to the address, so the link only verifies the email it was sent to
+    return create_access_token(
+        data={"user_id": str(user.id), "typ": "verify", "email": user.email},
+        expires_minutes=settings.VERIFY_TOKEN_EXPIRE_MINUTES,
+    )
