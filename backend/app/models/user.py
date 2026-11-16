@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, true
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, false, true
 
 from app.db.base import Base
 
@@ -22,6 +22,9 @@ class User(Base):
 
 	# False = banned
 	is_active = Column(Boolean, nullable=False, default=True, server_default=true())
+
+	# set by the emailed link, by Google sign-in, or by a password reset
+	email_verified = Column(Boolean, nullable=False, default=False, server_default=false())
 
 	created_at = Column(DateTime, default=datetime.now)
 

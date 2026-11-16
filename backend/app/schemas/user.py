@@ -21,6 +21,7 @@ class UserResponse(BaseModel):
 	username: str
 	role: str
 	has_password: bool
+	email_verified: bool
 
 	class Config:
 		from_attributes = True

@@ -51,8 +51,9 @@ def get_or_create_google_user(db: Session, sub: str, email: str, email_verified:
     user = db.query(User).filter(User.email == email).first()
     if user:
         user.google_sub = sub
+        user.email_verified = True
     else:
-        user = User(email=email, username=_unique_username(db, email), google_sub=sub)
+        user = User(email=email, username=_unique_username(db, email), google_sub=sub, email_verified=True)
         db.add(user)
     db.commit()
     db.refresh(user)

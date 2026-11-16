@@ -12,6 +12,7 @@ class AdminUserResponse(BaseModel):
     username: str | None
     role: str
     is_active: bool
+    email_verified: bool
     created_at: datetime | None
 
     class Config:

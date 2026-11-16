@@ -53,5 +53,6 @@ def reset_password(data: ResetPassword, db: Session = Depends(get_db)):
         raise invalid
 
     user.password_hash = hash_password(data.new_password)
+    user.email_verified = True  # they used a link sent to this address
     db.commit()
     return {"detail": "password updated, please log in"}
