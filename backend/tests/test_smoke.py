@@ -140,3 +140,25 @@ def test_cleanup_deletes_only_long_expired_links(make_client, session_factory):
         assert purge_expired_links(db, retention_days=30) == 1
         assert [u.short_code for u in db.query(Link).order_by(Link.short_code)] == ["forever", "recent"]
         assert db.query(Click).count() == 0  # the old link's click history went with it
+
+
+def test_email_verification_gates_link_creation(make_client, monkeypatch):
+    sent = []
+    monkeypatch.setattr("app.api.routes.auth.send_email", lambda to, subject, body: sent.append(body))
+
+    client = make_client()
+    creds = {"email": "new@example.com", "password": "pw12345678"}
+    client.post("/auth/register", json={**creds, "username": "newbie"})
+    client.post("/auth/login", json=creds)
+    token = sent[0].split("token=")[1].split()[0]
+
+    assert client.get("/auth/me").json()["email_verified"] is False
+    assert client.post("/urls", json={"url": URL}).status_code == 403
+
+    assert client.post("/auth/verify-email", json={"token": "nonsense"}).status_code == 400
+    assert client.post("/auth/verify-email", json={"token": token}).json()["email_verified"] is True
+    assert client.post("/urls", json={"url": URL}).status_code == 200
+
+    # once verified, asking again sends nothing
+    client.post("/auth/resend-verification")
+    assert len(sent) == 1

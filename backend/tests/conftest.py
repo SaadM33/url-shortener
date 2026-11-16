@@ -17,6 +17,7 @@ from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
 from app.models import click, url, user  # noqa: F401  (register tables)
+from app.models.user import User
 
 
 @pytest.fixture()
@@ -48,6 +49,9 @@ def make_client(session_factory):
         if name:
             creds = {"email": f"{name}@example.com", "password": "pw12345678"}
             client.post("/auth/register", json={**creds, "username": name})
+            with session_factory() as db:  # as if they clicked the emailed link
+                db.query(User).filter(User.email == creds["email"]).update({User.email_verified: True})
+                db.commit()
             assert client.post("/auth/login", json=creds).status_code == 200
         return client
 

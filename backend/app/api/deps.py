@@ -80,3 +80,9 @@ def limit_forgot(request: Request) -> None:
 
 def limit_resend_verify(current_user: User = Depends(get_current_user)) -> None:
     resend_verify_limiter.check(f"user:{current_user.id}")
+
+
+def require_verified_email(current_user: User = Depends(get_current_user)) -> User:
+    if settings.REQUIRE_EMAIL_VERIFICATION and not current_user.email_verified:
+        raise HTTPException(status_code=403, detail="verify your email address before creating links")
+    return current_user

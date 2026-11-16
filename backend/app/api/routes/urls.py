@@ -10,7 +10,7 @@ from sqlalchemy import and_, func, or_
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user, limit_create_url
+from app.api.deps import get_current_user, limit_create_url, require_verified_email
 from app.db.session import get_db
 from app.models.click import Click
 from app.models.url import URL
@@ -94,7 +94,7 @@ def get_owned_url(code: str, db: Session, user: User) -> URL:
     return url
 
 
-@router.post("/urls", response_model=URLResponse, dependencies=[Depends(limit_create_url)], tags=["Links"], summary='Create a short link', description='Random 6-character code, or pick your own with `alias` (3-50 letters, digits, `-`, `_`; reserved words not allowed). Optionally expire it by date and/or number of clicks.', responses=errors(400, 401, 403, 409, 422, 429))
+@router.post("/urls", response_model=URLResponse, dependencies=[Depends(require_verified_email), Depends(limit_create_url)], tags=["Links"], summary='Create a short link', description='Random 6-character code, or pick your own with `alias` (3-50 letters, digits, `-`, `_`; reserved words not allowed). Optionally expire it by date and/or number of clicks. Needs a verified email address.', responses=errors(400, 401, 403, 409, 422, 429))
 def create_url(
     data: URLInput,
     db: Session = Depends(get_db),
