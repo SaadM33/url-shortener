@@ -109,6 +109,7 @@ export default function AdminUsers() {
                           <div className="flex gap-1.5">
                             {u.role === 'admin' ? <Badge tone="indigo">Admin</Badge> : <Badge>User</Badge>}
                             {!u.is_active && <Badge tone="red">Banned</Badge>}
+                            {!u.email_verified && <Badge tone="amber">Unverified</Badge>}
                           </div>
                         </td>
                         <td className="hidden px-3 py-3 text-slate-500 md:table-cell dark:text-slate-400">{u.created_at ? formatDate(u.created_at) : '—'}</td>

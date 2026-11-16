@@ -63,9 +63,49 @@ export interface paths {
         put?: never;
         /**
          * Create an account
-         * @description Registers with email, username and a password of 8 to 72 characters. Does not log you in.
+         * @description Registers with email, username and a password of 8 to 72 characters, and emails a link to confirm the address. Does not log you in.
          */
         post: operations["register_auth_register_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/verify-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm an email address
+         * @description Uses the token from the verification email. Works without being logged in. Using it twice is harmless.
+         */
+        post: operations["verify_email_auth_verify_email_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/resend-verification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send the verification email again
+         * @description For the logged-in user. Does nothing if the address is already verified.
+         */
+        post: operations["resend_verification_auth_resend_verification_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -395,7 +435,7 @@ export interface paths {
         put?: never;
         /**
          * Create a short link
-         * @description Random 6-character code, or pick your own with `alias` (3-50 letters, digits, `-`, `_`; reserved words not allowed). Optionally expire it by date and/or number of clicks.
+         * @description Random 6-character code, or pick your own with `alias` (3-50 letters, digits, `-`, `_`; reserved words not allowed). Optionally expire it by date and/or number of clicks. Needs a verified email address.
          */
         post: operations["create_url_urls_post"];
         delete?: never;
@@ -524,6 +564,8 @@ export interface components {
             role: string;
             /** Is Active */
             is_active: boolean;
+            /** Email Verified */
+            email_verified: boolean;
             /** Created At */
             created_at: string | null;
         };
@@ -780,6 +822,8 @@ export interface components {
             role: string;
             /** Has Password */
             has_password: boolean;
+            /** Email Verified */
+            email_verified: boolean;
         };
         /** ValidationError */
         ValidationError: {
@@ -793,6 +837,11 @@ export interface components {
             input?: unknown;
             /** Context */
             ctx?: Record<string, never>;
+        };
+        /** VerifyEmail */
+        VerifyEmail: {
+            /** Token */
+            token: string;
         };
     };
     responses: never;
@@ -1002,6 +1051,87 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+            /** @description Too many requests; wait for `Retry-After` seconds */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    verify_email_auth_verify_email_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyEmail"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserResponse"];
+                };
+            };
+            /** @description Invalid request (see `detail`) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resend_verification_auth_resend_verification_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Not logged in, or the session expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not allowed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Too many requests; wait for `Retry-After` seconds */
             429: {

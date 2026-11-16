@@ -107,6 +107,21 @@ export function useResetPassword() {
   })
 }
 
+export function useVerifyEmail() {
+  const qc = useQueryClient()
+  return useMutation({
+    meta: { expectsUnauthorized: true },
+    mutationFn: (body: { token: string }) => api<User>('/auth/verify-email', { method: 'POST', body }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: keys.me }),
+  })
+}
+
+export function useResendVerification() {
+  return useMutation({
+    mutationFn: () => api<Detail>('/auth/resend-verification', { method: 'POST' }),
+  })
+}
+
 // ---------- account ----------
 
 export function useOverview(days: number) {

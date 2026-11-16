@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { useLogout, useMe } from '@/api/queries'
 import { Logo } from '@/components/Logo'
 import { ThemeToggle } from '@/components/ThemeToggle'
+import { VerifyEmailBanner } from '@/components/VerifyEmailBanner'
 import { Button } from '@/components/ui/Button'
 import { useSessionKeepAlive } from '@/hooks/useSessionKeepAlive'
 import { cn } from '@/lib/cn'
@@ -109,6 +110,7 @@ export function AppLayout() {
         )}
         <main id="main" className="min-w-0 flex-1 px-4 py-6 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl">
+            {user && !user.email_verified && <VerifyEmailBanner user={user} />}
             <Outlet />
           </div>
         </main>

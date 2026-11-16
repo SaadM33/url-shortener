@@ -32,7 +32,7 @@ Responses: `200` [UserResponse](#userresponse) · `401` Not logged in, or the se
 
 **Create an account**
 
-Registers with email, username and a password of 8 to 72 characters. Does not log you in.
+Registers with email, username and a password of 8 to 72 characters, and emails a link to confirm the address. Does not log you in.
 
 JSON body:
 
@@ -43,6 +43,28 @@ JSON body:
 | `username` | string | yes |  |
 
 Responses: `200` [UserResponse](#userresponse) · `400` Invalid request (see `detail`) · `429` Too many requests; wait for `Retry-After` seconds · `422` validation error
+
+### `POST /auth/verify-email`
+
+**Confirm an email address**
+
+Uses the token from the verification email. Works without being logged in. Using it twice is harmless.
+
+JSON body:
+
+| Name | Type | Required | Notes |
+|---|---|---|---|
+| `token` | string | yes |  |
+
+Responses: `200` [UserResponse](#userresponse) · `400` Invalid request (see `detail`) · `422` validation error
+
+### `POST /auth/resend-verification` 🔒
+
+**Send the verification email again**
+
+For the logged-in user. Does nothing if the address is already verified.
+
+Responses: `200` Successful Response · `401` Not logged in, or the session expired · `403` Not allowed · `429` Too many requests; wait for `Retry-After` seconds
 
 ### `POST /auth/login`
 
@@ -215,7 +237,7 @@ Responses: `200` [URLPage](#urlpage) · `401` Not logged in, or the session expi
 
 **Create a short link**
 
-Random 6-character code, or pick your own with `alias` (3-50 letters, digits, `-`, `_`; reserved words not allowed). Optionally expire it by date and/or number of clicks.
+Random 6-character code, or pick your own with `alias` (3-50 letters, digits, `-`, `_`; reserved words not allowed). Optionally expire it by date and/or number of clicks. Needs a verified email address.
 
 JSON body:
 
@@ -489,6 +511,7 @@ Responses: `200` Successful Response
 | `username` | string or null | yes |  |
 | `role` | string | yes |  |
 | `is_active` | boolean | yes |  |
+| `email_verified` | boolean | yes |  |
 | `created_at` | string (date-time) or null | yes |  |
 
 <a id="adminuserupdate"></a>
@@ -673,3 +696,11 @@ Responses: `200` Successful Response
 | `username` | string | yes |  |
 | `role` | string | yes |  |
 | `has_password` | boolean | yes |  |
+| `email_verified` | boolean | yes |  |
+
+<a id="verifyemail"></a>
+### VerifyEmail
+
+| Name | Type | Required | Notes |
+|---|---|---|---|
+| `token` | string | yes |  |

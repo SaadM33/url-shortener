@@ -178,7 +178,7 @@
           "Auth"
         ],
         "summary": "Create an account",
-        "description": "Registers with email, username and a password of 8 to 72 characters. Does not log you in.",
+        "description": "Registers with email, username and a password of 8 to 72 characters, and emails a link to confirm the address. Does not log you in.",
         "operationId": "register_auth_register_post",
         "requestBody": {
           "content": {
@@ -218,6 +218,85 @@
             }
           }
         }
+      }
+    },
+    "/auth/verify-email": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Confirm an email address",
+        "description": "Uses the token from the verification email. Works without being logged in. Using it twice is harmless.",
+        "operationId": "verify_email_auth_verify_email_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyEmail"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (see `detail`)"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/resend-verification": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Send the verification email again",
+        "description": "For the logged-in user. Does nothing if the address is already verified.",
+        "operationId": "resend_verification_auth_resend_verification_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in, or the session expired"
+          },
+          "403": {
+            "description": "Not allowed"
+          },
+          "429": {
+            "description": "Too many requests; wait for `Retry-After` seconds"
+          }
+        },
+        "security": [
+          {
+            "APIKeyCookie": []
+          }
+        ]
       }
     },
     "/auth/login": {
@@ -1299,7 +1378,7 @@
           "Links"
         ],
         "summary": "Create a short link",
-        "description": "Random 6-character code, or pick your own with `alias` (3-50 letters, digits, `-`, `_`; reserved words not allowed). Optionally expire it by date and/or number of clicks.",
+        "description": "Random 6-character code, or pick your own with `alias` (3-50 letters, digits, `-`, `_`; reserved words not allowed). Optionally expire it by date and/or number of clicks. Needs a verified email address.",
         "operationId": "create_url_urls_post",
         "security": [
           {
@@ -1742,6 +1821,10 @@
             "type": "boolean",
             "title": "Is Active"
           },
+          "email_verified": {
+            "type": "boolean",
+            "title": "Email Verified"
+          },
           "created_at": {
             "anyOf": [
               {
@@ -1762,6 +1845,7 @@
           "username",
           "role",
           "is_active",
+          "email_verified",
           "created_at"
         ],
         "title": "AdminUserResponse"
@@ -2430,6 +2514,10 @@
           "has_password": {
             "type": "boolean",
             "title": "Has Password"
+          },
+          "email_verified": {
+            "type": "boolean",
+            "title": "Email Verified"
           }
         },
         "type": "object",
@@ -2438,7 +2526,8 @@
           "email",
           "username",
           "role",
-          "has_password"
+          "has_password",
+          "email_verified"
         ],
         "title": "UserResponse"
       },
@@ -2481,6 +2570,19 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VerifyEmail": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "title": "VerifyEmail"
       }
     },
     "securitySchemes": {

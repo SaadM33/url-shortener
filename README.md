@@ -50,6 +50,7 @@ One file at the repo root, read by the backend, the frontend (`VITE_*` only) and
 | `FRONTEND_URL` | http://localhost:3100 | CORS origin and where emails/Google sign-in send people |
 | `COOKIE_SECURE`, `COOKIE_SAMESITE` | false, lax | Set `COOKIE_SECURE=true` behind HTTPS |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI` | unset | Google sign-in |
+| `REQUIRE_EMAIL_VERIFICATION` | true | New accounts must click the emailed link before creating links. Set `false` to skip locally |
 | `SMTP_HOST` (+ `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_STARTTLS`) | unset | Without it, emails are printed in the API log |
 | `RATE_LIMIT_ENABLED`, `RATE_*_PER_MIN` | on | Login 10, register 5, forgot-password 3 per IP; link creation 30 per user (per minute) |
 | `CLEANUP_ENABLED`, `EXPIRED_LINK_RETENTION_DAYS`, `CLEANUP_INTERVAL_MINUTES` | on, 30, 60 | Deletes links that expired more than 30 days ago |

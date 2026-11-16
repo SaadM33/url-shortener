@@ -35,7 +35,7 @@ Tests: keep minimal, a few smoke tests only.
 ## Phase 6: Next tier
 - [x] QR codes (7, generated in the frontend)
 - [x] Password reset by email (12)
-- [ ] Email verification (12)
+- [x] Email verification (12)
 - [x] Profile management (13)
 - [ ] API keys (14)
 - [x] Account overview (17)

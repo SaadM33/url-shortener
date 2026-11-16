@@ -41,7 +41,7 @@ export default function Register() {
     }
     try {
       await login.mutateAsync({ email, password })
-      toast.success('Welcome to Shortly!')
+      toast.success('Welcome to Shortly! Check your inbox to confirm your email.')
       navigate('/dashboard', { replace: true })
     } catch {
       navigate('/login', { replace: true })
